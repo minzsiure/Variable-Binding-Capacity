@@ -1,5 +1,5 @@
 # Variable-Binding-Capacity
-The emergence of Associative Memories in Assembly Calculus and the evaluation of its capacity with respect to model parameters, brain size ($n$) and cap size ($k$), along with a newly introduced model: skip connections with variable binding (**VB**).
+The emergence of Associative Memories in Assembly Calculus and the evaluation of its capacity with respect to model parameters, brain size ($n$) and cap size ($k$), along with a newly introduced model: *skip connections* with *variable binding* (**VB**).
 
 brain.py 
 ---
