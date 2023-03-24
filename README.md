@@ -33,7 +33,8 @@ python run_grand_capacity.py --operation project --parameter n --ntrials 5 --plo
 python run_grand_capacity.py --operation project --parameter k --ntrials 5 --plot plot1 --skipConnection True
 ```
 
-Note that `skipConnection` is a `bool`, indicating whether to do direct decoder (skip connection) from area 0 to area 2!
+Note that `skipConnection` is a `bool`, indicating whether to do direct decoder (skip connection) from area 0 to area 2.
+
 We also note that reci-project is noisier than project in general, so one can consider to relax the threadhold when searching capacity. Here, we only include the non-relaxed threadhold.
 
 **Run reci-project wrt to n**
