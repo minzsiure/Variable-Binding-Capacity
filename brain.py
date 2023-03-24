@@ -703,8 +703,8 @@ class Brain:
                                     return_weights_assembly=False,
                                     only_once=False):
         '''
-        We perform Reciprocal Projection: 
-            Area2 <--> Area3
+        We perform modified Reciprocal Projection: 
+            Area2 <--> Area3 ONLY
         Project a fix set of neurons in area 1,
         area2 receives both feedforward activations from area1 and area3,
         area3 receives feedforward activations from area2,

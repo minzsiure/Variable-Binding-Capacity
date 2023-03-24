@@ -21,7 +21,7 @@ class Stimuli:
         self.nclasses = nclasses
         self.nsamples = nsamples
         self.num_neurons = num_neurons  # n
-        # self.q = q*k/num_neurons  # TODO
+
         self.q = q
         self.r = r
         self.k = k
@@ -30,8 +30,6 @@ class Stimuli:
 
         for iclass in range(self.nclasses):
             class_dist = np.full(self.num_neurons, self.q)
-            # class_dist[random.sample(
-            #     range(self.num_neurons), self.k)] = self.r
             class_dist[random.sample(
                 range(self.num_neurons), self.num_neurons_in_core)] = self.r
             self.distributions.append(class_dist)
