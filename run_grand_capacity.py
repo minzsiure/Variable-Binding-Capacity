@@ -9,8 +9,10 @@ import random
 import copy
 import argparse
 import seaborn as sns
+import os
 from scipy.stats import pearsonr
 from sklearn.linear_model import LogisticRegression
+
 
 # setting global random seed
 rng = np.random.default_rng(2022)
@@ -513,6 +515,11 @@ def test_capacity_in_projection_as_a_function_of_brain_size_with_linear_classifi
 
         # save figure
         output_directory = 'figures/project_capacity/capacity_wrt_n/'
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+            print(f"Created directory: {output_directory}")
+        else:
+            print(f"Directory already exists: {output_directory}")
         output_filepath = output_directory + plot_name
         plt.savefig(output_filepath, format='pdf')
 
@@ -592,6 +599,11 @@ def test_capacity_in_projection_as_a_function_of_capk_size_with_linear_classifie
 
         # save figure
         output_directory = 'figures/project_capacity/capacity_wrt_k/'
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+            print(f"Created directory: {output_directory}")
+        else:
+            print(f"Directory already exists: {output_directory}")
         output_filepath = output_directory + plot_name
         plt.savefig(output_filepath, format='pdf')
 
@@ -675,6 +687,11 @@ def test_capacity_in_projection_as_a_function_of_beta_with_linear_classifier(bet
 
         # save figure
         output_directory = 'figures/project_capacity/capacity_wrt_beta/'
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+            print(f"Created directory: {output_directory}")
+        else:
+            print(f"Directory already exists: {output_directory}")
         output_filepath = output_directory + plot_name
         plt.savefig(output_filepath, format='pdf')
 
@@ -788,6 +805,11 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_brain_size_with_line
 
         # save figure
         output_directory = 'figures/reciprocal_project_capacity/capacity_wrt_n/'
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+            print(f"Created directory: {output_directory}")
+        else:
+            print(f"Directory already exists: {output_directory}")
         output_filepath = output_directory + plot_name
         plt.savefig(output_filepath, format='pdf')
         plt.show()
@@ -891,6 +913,11 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_capk_size_with_linea
 
         # save figure
         output_directory = 'figures/reciprocal_project_capacity/capacity_wrt_k/'
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+            print(f"Created directory: {output_directory}")
+        else:
+            print(f"Directory already exists: {output_directory}")
         output_filepath = output_directory + plot_name
         plt.savefig(output_filepath, format='pdf')
 
