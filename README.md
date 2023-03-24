@@ -23,24 +23,24 @@ run_grand_capacity.py
 Capacity of Assembly Calculus in terms of `n` and `k`.
 To run, use the following command:
 
-Run projection wrt to n
+**Run projection wrt to n**
 ```
 python run_grand_capacity.py --operation project --parameter n --ntrials 5 --plot plot1 --skipConnection True
 ```
 
-Run projection wrt to k
+**Run projection wrt to k**
 ```
 python run_grand_capacity.py --operation project --parameter k --ntrials 5 --plot plot1 --skipConnection True
 ```
 
 Note that `skipConnection` is a `bool`, indicating whether to do direct decoder (skip connection) from area 0 to area 2!
 
-Run reci-project wrt to n
+**Run reci-project wrt to n**
 ```
 python run_grand_capacity.py --operation reci-project --parameter n --ntrials 5 --plot plot1 --skipConnection True
 ```
 
-Run reci-project wrt to k
+**Run reci-project wrt to k**
 ```
 python run_grand_capacity.py --operation reci-project --parameter k --ntrials 5 --plot plot1 --skipConnection True
 ```
