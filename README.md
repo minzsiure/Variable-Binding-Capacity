@@ -3,16 +3,16 @@ The emergence of Associative Memories in Assembly Calculus and the evaluation of
 
 brain.py 
 ---
-Define Brain (class), which consists of several Area (class). 
+Define `Brain` (class), which consists of several `Area` (class). 
 Many important operations in Assembly Calculus, such as `projection` and `reciprocal_projection` are defined.
 
 area.py
 ---
-Define Area (class), which is where assemblies are formed.
+Define `Area` (class), which is where assemblies are formed.
 
 stimuli.py
 ---
-Given number of classes and number of samples per class, generate a stimuli matrix with dimension (self.nclasses, self.nsamples, self.num_neurons)
+Given number of classes and number of samples per class, generate a stimuli matrix with dimension (`self.nclasses`, `self.nsamples`, `self.num_neurons`)
 
 utils.py
 ---
