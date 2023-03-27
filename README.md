@@ -18,9 +18,9 @@ utils.py
 ---
 Define commonly used functions such as `capk`, `hebbian_update`, `find_feedforward_matrix_index`, `generate_labels`.
 
-run_grand_capacity.py
+To reproduce the model capacity:
 ---
-Capacity of Assembly Calculus in terms of `n` and `k`.
+`run_grand_capacity.py` measures the capacity of Assembly Calculus in terms of `n` and `k`.
 To run, use the following command:
 
 **Run projection wrt to n**
