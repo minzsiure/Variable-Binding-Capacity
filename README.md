@@ -49,4 +49,4 @@ python run_grand_capacity.py --operation reci-project --parameter k --ntrials 5 
 
 To reproduce the SVD distance plot
 ---
-Run `python ccn2023/cns_fig1.py`
+Run `python svd_plot/cns_fig1.py`
