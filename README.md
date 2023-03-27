@@ -47,6 +47,6 @@ python run_grand_capacity.py --operation reci-project --parameter n --ntrials 5 
 python run_grand_capacity.py --operation reci-project --parameter k --ntrials 5 --plot plot1 --skipConnection True
 ```
 
-To reproduce the SVD distance plot -
+To reproduce the SVD distance plot
 ---
 Run `python ccn2023/cns_fig1.py`
