@@ -25,12 +25,12 @@ To run, use the following command:
 
 **Run projection wrt to n**
 ```
-python run_grand_capacity.py --operation project --parameter n --ntrials 5 --plot plot1 --skipConnection True
+python run_grand_capacity.py --operation project --parameter n --ntrials 5 --plot plot1 --skipConnection True --transposeWeight False
 ```
 
 **Run projection wrt to k**
 ```
-python run_grand_capacity.py --operation project --parameter k --ntrials 5 --plot plot1 --skipConnection True
+python run_grand_capacity.py --operation project --parameter k --ntrials 5 --plot plot1 --skipConnection True --transposeWeight False
 ```
 
 Note that `skipConnection` is a `bool`, indicating whether to do direct decoder (skip connection) from area 0 to area 2.
@@ -39,12 +39,12 @@ We also note that reci-project is noisier than project in general, so one can co
 
 **Run reci-project wrt to n**
 ```
-python run_grand_capacity.py --operation reci-project --parameter n --ntrials 5 --plot plot1 --skipConnection True
+python run_grand_capacity.py --operation reci-project --parameter n --ntrials 5 --plot plot1 --skipConnection True --transposeWeight False
 ```
 
 **Run reci-project wrt to k**
 ```
-python run_grand_capacity.py --operation reci-project --parameter k --ntrials 5 --plot plot1 --skipConnection True
+python run_grand_capacity.py --operation reci-project --parameter k --ntrials 5 --plot plot1 --skipConnection True --transposeWeight False
 ```
 
 To reproduce the SVD distance plot:
