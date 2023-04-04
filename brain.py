@@ -191,9 +191,9 @@ class Brain:
     def associate(self):
         """
         If two assemblies in two different areas have been independently `projected`
-        in a third area to form assemblies x and y, and, subsequently, 
-        the two parent assemblies fire simultaneously, then each of x,y 
-        will respond by having some of its neurons migrate to the other assembly; 
+        in a third area to form assemblies x and y, and, subsequently,
+        the two parent assemblies fire simultaneously, then each of x,y
+        will respond by having some of its neurons migrate to the other assembly;
         this is called association of x and y.
         """
         pass
@@ -322,7 +322,7 @@ class Brain:
                            return_weights_assembly=False,
                            only_once=False, new_winner=False):
         '''
-        We perform Reciprocal Projection: 
+        We perform Reciprocal Projection:
             Area1 (stimulus x) -> Area2 <--> Area3
         Project a fix set of neurons in area 1,
         area2 receives both feedforward activations from area1 and area3,
@@ -503,7 +503,7 @@ class Brain:
                                     return_weights_assembly=False,
                                     only_once=False, new_winner=False):
         '''
-        We perform Reciprocal Projection: 
+        We perform Reciprocal Projection:
             Area1 (stimulus x) -> Area2 <--> Area3
         Project a fix set of neurons in area 1,
         area2 receives both feedforward activations from area1 and area3,
@@ -697,13 +697,196 @@ class Brain:
             return stable_rank_ratio_1to2, stable_rank_ratio_2to3, stable_rank_ratio_3to2
         return touched_neurons_size_2, touched_neurons_size_3
 
+    def transpose_reciprocal_project(self, input_activation, area1_index, area2_index, area3_index,
+                                     max_iterations=100, verbose=0,
+                                     return_stable_rank=False,
+                                     return_weights_assembly=False,
+                                     only_once=False):
+        '''
+        We perform transpose Reciprocal Projection:
+            Area1 (stimulus x) -> Area2 <--> Area3
+        Project a fix set of neurons in area 1,
+        area2 receives both feedforward activations from area1 and area3,
+        area3 receives feedforward activations from area2,
+        area2 and area3 both have recurrence connections.
+        area2(t+1) = W1to2 * area1(t) + W2to2 * area2(t) + W3to2 * area3(t)
+            update W1to2, W2to2, W3to2
+        area3(t+1) = W2to3 * area2(t) + W3to3 * area3(t)
+            update W2to3, W3to3
+
+        Modification: W2to3 will just be the transpose of W3to2
+        '''
+        # disinhibit areas
+        self.areas[area2_index].disinhibit()
+        self.areas[area3_index].disinhibit()
+
+        # find the index storing feedforward and feedback connection matrix
+        iweights_1to2 = find_feedforward_matrix_index(
+            self.area_combinations, area1_index, area2_index)  # feedforward
+
+        iweights_3to2 = find_feedforward_matrix_index(
+            self.area_combinations, area3_index, area2_index)  # feedbackward
+
+        iweights_2to3 = find_feedforward_matrix_index(
+            self.area_combinations, area2_index, area3_index)  # feedforward
+
+        if not only_once:
+            # randomly initialize feedforward and recurrent connections
+            self.feedforward_connections[iweights_1to2] = self.sample_initial_connections(
+            )
+            self.areas[area2_index].recurrent_connections = self.areas[area2_index].sample_initial_connections()
+
+            self.areas[area3_index].recurrent_connections = self.areas[area3_index].sample_initial_connections()
+            self.feedforward_connections[iweights_3to2] = self.sample_initial_connections(
+            )
+
+            """modification"""
+            self.feedforward_connections[iweights_2to3] = self.feedforward_connections[iweights_3to2].T
+
+        # track indices and total numbers of neurons activated so far in each iteration
+        touched_neurons_2 = set()
+        touched_neurons_3 = set()
+        touched_neurons_size_2 = []
+        touched_neurons_size_3 = []
+
+        # record winner neurons for the previous iteration
+        prev_winners_area2 = self.areas[area2_index].activations
+        prev_winners_area3 = self.areas[area3_index].activations
+
+        # store ratio of stable rank
+        stable_rank_ratio_1to2 = []
+        stable_rank_ratio_2to3 = []
+        stable_rank_ratio_3to2 = []
+
+        for t in range(max_iterations):
+            if verbose and (t != 0) and (t % 50 == 0):
+                print("\titeration", t)
+            if only_once:
+                assert t < 1
+
+            # forward pass: area1 --> area2 <-- area3 (feedforward from 1 and from 3 + recurrent in 2)
+            # feedforward 1 to 2
+            feedforward_activations_1to2 = self.feedforward_connections[iweights_1to2].dot(
+                input_activation)
+            # self-recurrent activation in area2 (the first self-recurrent does not have any effect because activations are 0s)
+            recurrent_activations_2 = self.areas[area2_index].recurrent_connections.dot(
+                prev_winners_area2)
+            # feedforward 3 to 2
+            feedforward_activations_3to2 = self.feedforward_connections[iweights_3to2].dot(
+                prev_winners_area3)
+            # add the activations to the feedforward activations
+            self.areas[area2_index].activations = feedforward_activations_1to2 + \
+                recurrent_activations_2 + feedforward_activations_3to2
+
+            # thresholding the activations by allowing only topk neurons
+            winners_area2 = capk(
+                self.areas[area2_index].activations, self.areas[area2_index].k)
+            self.areas[area2_index].activations = winners_area2
+
+            # hebbian update: feedforward connection area1 to 2
+            self.feedforward_connections[iweights_1to2] = hebbian_update(input_activation,
+                                                                         self.areas[area2_index].activations,
+                                                                         self.feedforward_connections[iweights_1to2],
+                                                                         self.beta)
+            # hebbian update: feedforward connection area3 to 2
+            self.feedforward_connections[iweights_3to2] = hebbian_update(prev_winners_area3,
+                                                                         self.areas[area2_index].activations,
+                                                                         self.feedforward_connections[iweights_3to2],
+                                                                         self.beta)
+            # hebbian update: recurrent connection in area2
+            self.areas[area2_index].recurrent_connections = hebbian_update(prev_winners_area2,
+                                                                           self.areas[area2_index].activations,
+                                                                           self.areas[area2_index].recurrent_connections,
+                                                                           self.beta)
+            # update neurons touched
+            touched_neurons_2 = touched_neurons_2.union(
+                np.where(winners_area2 != 0)[0])
+            touched_neurons_size_2.append(len(touched_neurons_2))
+
+            # forward pass: area2 --> area3 (feedforward from 2 to 3 + recurrent in 3)
+            # use prev winner in area2
+            """modification"""
+            feedforward_activations_2to3 = self.feedforward_connections[iweights_2to3].dot(
+                prev_winners_area2)
+
+            # self-recurrent activation in area3 (the first self-recurrent does not have any effect because activations are 0s)
+            recurrent_activations_3 = self.areas[area3_index].recurrent_connections.dot(
+                prev_winners_area3)
+            # add the activations to the feedforward activations
+            self.areas[area3_index].activations = feedforward_activations_2to3 + \
+                recurrent_activations_3
+            # thresholding the activations by allowing only topk neurons
+            winners_area3 = capk(
+                self.areas[area3_index].activations, self.areas[area3_index].k)
+
+            self.areas[area3_index].activations = winners_area3
+
+            """ modification: update W2to3 with W3to2.T """
+            # hebbian update: feedforward weight area2 to 3
+            self.feedforward_connections[iweights_2to3] = self.feedforward_connections[iweights_3to2].T
+
+            # hebbian update: recurrent connection in 3
+            self.areas[area3_index].recurrent_connections = hebbian_update(prev_winners_area3,
+                                                                           self.areas[area3_index].activations,
+                                                                           self.areas[area3_index].recurrent_connections,
+                                                                           self.beta)
+            # update neurons touched
+            touched_neurons_3 = touched_neurons_3.union(
+                np.where(winners_area3 != 0)[0])
+            touched_neurons_size_3.append(len(touched_neurons_3))
+
+            # if asked, do SVD and calculate top-k singular value ratio
+            if return_stable_rank:
+                # single value decomposition
+                u1to2, s1to2, v1to2 = np.linalg.svd(
+                    self.feedforward_connections[iweights_1to2])
+                u2to3, s2to3, v2to3 = np.linalg.svd(
+                    self.feedforward_connections[iweights_2to3])
+                u3to2, s3to2, v3to2 = np.linalg.svd(
+                    self.feedforward_connections[iweights_3to2])
+                # calculate the sum of top-k singular values, and its ratio wrt sum of all singular values
+                stable_rank_ratio_1to2.append(
+                    np.sum(s1to2[:self.areas[area2_index].topk])/np.sum(s1to2))
+                stable_rank_ratio_2to3.append(
+                    np.sum(s2to3[:self.areas[area3_index].topk])/np.sum(s2to3))
+                stable_rank_ratio_3to2.append(
+                    np.sum(s3to2[:self.areas[area2_index].topk])/np.sum(s3to2))
+
+            # update prev winners
+            prev_winners_area2 = np.copy(winners_area2)
+            prev_winners_area3 = np.copy(winners_area3)
+
+            if verbose and (t == max_iterations - 1):
+                print("\tExhausted all iterations.")
+
+        if return_weights_assembly:  # return connection weights and assembly activations
+            return self.feedforward_connections[iweights_1to2], \
+                self.feedforward_connections[iweights_2to3], \
+                self.feedforward_connections[iweights_3to2], \
+                self.areas[area2_index].recurrent_connections,\
+                self.areas[area3_index].recurrent_connections,\
+                self.areas[area2_index].activations,\
+                self.areas[area3_index].activations,
+
+        if not only_once:
+            # wipe activations
+            self.wipe_all_activations()
+
+        # inhibit neurons
+        self.areas[area2_index].inhibit()
+        self.areas[area3_index].inhibit()
+
+        if return_stable_rank:
+            return stable_rank_ratio_1to2, stable_rank_ratio_2to3, stable_rank_ratio_3to2
+        return touched_neurons_size_2, touched_neurons_size_3
+
     def modified_reciprocal_project(self, input_activation, area1_index, area2_index, area3_index,
                                     max_iterations=100, verbose=0,
                                     return_stable_rank=False,
                                     return_weights_assembly=False,
                                     only_once=False):
         '''
-        We perform modified Reciprocal Projection: 
+        We perform modified Reciprocal Projection:
             Area2 <--> Area3 ONLY
         Project a fix set of neurons in area 1,
         area2 receives both feedforward activations from area1 and area3,

@@ -198,7 +198,8 @@ def multiround_test_capacity_using_reciprocal_projection_with_linear_classifier(
                                                                                 k=50, connection_p=0.1, r=0.9, q=0.01, num_samples=50,
                                                                                 with_normalization=True, wipe_y=True,
                                                                                 nrecurrent_rounds=5, residual_reci_project=False, classifier=False,
-                                                                                show_input_overlap=False, use_average=True):
+                                                                                show_input_overlap=False, use_average=True,
+                                                                                transpose_weight=False):
     '''
     This function measures in- and out- class similaritiy of stimuli and assembly under reciprocal-projection.
     nrounds: number of examples from each class shown to the brain during hebbian traing.
@@ -246,12 +247,22 @@ def multiround_test_capacity_using_reciprocal_projection_with_linear_classifier(
 
         for iiter in range(nrounds):  # do hebbian learning using nrounds samples
             x = np.random.binomial(1, class_dist)
+            if residual_reci_project and transpose_weight:
+                assert "invalid"
             if residual_reci_project:
+                # print('skip connection')
                 _, _, _, _, _, _, y2, y3 = brain.residual_reciprocal_project(x, area1_index=0, area2_index=1, area3_index=2,
                                                                              max_iterations=1, verbose=0,
                                                                              return_weights_assembly=True,
                                                                              only_once=True)  # keep activations un-wiped
+            elif transpose_weight:
+                # print('transpose connection')
+                _, _, _, _, _, _, y2, y3 = brain.transpose_reciprocal_project(x, area1_index=0, area2_index=1, area3_index=2,
+                                                                              max_iterations=1, verbose=0,
+                                                                              return_weights_assembly=True,
+                                                                              only_once=True)  # keep activations un-wiped
             else:
+                # print('vanilla model')
                 _, _, _, _, _, y2, y3 = brain.reciprocal_project(x, area1_index=0, area2_index=1, area3_index=2,
                                                                  max_iterations=1, verbose=0,
                                                                  return_weights_assembly=True,
@@ -289,6 +300,7 @@ def multiround_test_capacity_using_reciprocal_projection_with_linear_classifier(
 
                 for iround in range(nrecurrent_rounds):
                     x = inputs_to_train[j, isample]
+
                     new_area2_activations = capk(brain.feedforward_connections[iweights_1to2].dot(x)
                                                  + brain.areas[1].recurrent_connections.dot(temp_area2_activations_train)
                                                  + brain.feedforward_connections[iweights_3to2].dot(temp_area3_activations_train),
@@ -317,6 +329,7 @@ def multiround_test_capacity_using_reciprocal_projection_with_linear_classifier(
 
             for iround in range(nrecurrent_rounds):
                 x = inputs_to_test[j, isample]
+
                 new_area2_activations = capk(brain.feedforward_connections[iweights_1to2].dot(x)
                                              + brain.areas[1].recurrent_connections.dot(temp_area2_activations_test)
                                              + brain.feedforward_connections[iweights_3to2].dot(temp_area3_activations_test),
@@ -704,7 +717,8 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_brain_size_with_line
                                                                                               num_samples=50, with_normalization=True, wipe_y=True,
                                                                                               nrecurrent_rounds=5, num_trials=5,
                                                                                               plot_all=True, plot_name='plot1.pdf', residual_reci_project=False,
-                                                                                              classifier=False, show_input_overlap=False, use_average=True):
+                                                                                              classifier=False, show_input_overlap=False, use_average=True,
+                                                                                              transpose_weight=False):
     '''
     We test for capacity in assembly calculus with respect to 
     confusion between average in- and out- class similarity
@@ -740,12 +754,13 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_brain_size_with_line
                                                                                                                                                                                                 num_samples=num_samples,
                                                                                                                                                                                                 with_normalization=with_normalization, wipe_y=wipe_y,
                                                                                                                                                                                                 nrecurrent_rounds=nrecurrent_rounds, residual_reci_project=residual_reci_project,
-                                                                                                                                                                                                classifier=classifier, show_input_overlap=show_input_overlap, use_average=use_average)
+                                                                                                                                                                                                classifier=classifier, show_input_overlap=show_input_overlap, use_average=use_average,
+                                                                                                                                                                                                transpose_weight=transpose_weight)
                 if not obtain_capacity_of_Y and overlap_within_class_Y <= overlap_outside_class_Y:
                     avg_capacity_Y.append(try_class)
                     obtain_capacity_of_Y = True
                     # break
-                if not obtain_capacity_of_Z and overlap_within_class_Z - 0.05 <= overlap_outside_class_Z:
+                if not obtain_capacity_of_Z and overlap_within_class_Z <= overlap_outside_class_Z:
                     avg_capacity_Z.append(try_class)
                     obtain_capacity_of_Z = True
 
@@ -938,6 +953,8 @@ if __name__ == "__main__":
                         help="name of the plot")
     parser.add_argument("--skipConnection", type=bool,
                         required=True, help="whether to use skip connection")
+    parser.add_argument("--transposeWeight", type=bool,
+                        required=True, help="whether to set W2to3=W3to2.T")
 
     args = parser.parse_args()
     # Access the variables
@@ -946,6 +963,7 @@ if __name__ == "__main__":
     ntrials = args.ntrials
     plot = args.plot
     skipConnection = args.skipConnection
+    transposeWeight = args.transposeWeight
 
     if operation == "project":
         # project wrt k
@@ -964,4 +982,4 @@ if __name__ == "__main__":
                 20, 240], plot_name='%s.pdf' % (plot), num_trials=ntrials, residual_reci_project=skipConnection, classifier=False, use_average=True)
         if parameter == 'n':
             test_capacity_in_reciprocal_projection_as_a_function_of_brain_size_with_linear_classifier(
-                [100, 800], num_trials=ntrials, nrecurrent_rounds=5, plot_name='%s.pdf' % (plot), residual_reci_project=skipConnection, classifier=False, use_average=True)
+                [100, 800], num_trials=ntrials, nrecurrent_rounds=5, plot_name='%s.pdf' % (plot), residual_reci_project=skipConnection, classifier=False, use_average=True, transpose_weight=transposeWeight)
