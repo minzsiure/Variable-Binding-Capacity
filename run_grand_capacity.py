@@ -837,7 +837,8 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_capk_size_with_linea
                                                                                              num_samples=50, with_normalization=True, wipe_y=True,
                                                                                              nrecurrent_rounds=5, num_trials=5,
                                                                                              plot_all=True, plot_name='plot1.pdf',  residual_reci_project=False,
-                                                                                             classifier=False, show_input_overlap=False, use_average=True):
+                                                                                             classifier=False, show_input_overlap=False, use_average=True,
+                                                                                             transpose_weight=False):
     '''
     We test for capacity in assembly calculus with respect to 
     confusion between average in- and out- class similarity
@@ -873,7 +874,8 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_capk_size_with_linea
                                                                                                                                                                                                 num_samples=num_samples,
                                                                                                                                                                                                 with_normalization=with_normalization, wipe_y=wipe_y,
                                                                                                                                                                                                 nrecurrent_rounds=nrecurrent_rounds, residual_reci_project=residual_reci_project,
-                                                                                                                                                                                                classifier=classifier, show_input_overlap=show_input_overlap, use_average=use_average)
+                                                                                                                                                                                                classifier=classifier, show_input_overlap=show_input_overlap,
+                                                                                                                                                                                                use_average=use_average, transpose_weight=transpose_weight)
                 if not obtain_capacity_of_Y and overlap_within_class_Y <= overlap_outside_class_Y:
                     avg_capacity_Y.append(try_class)
                     obtain_capacity_of_Y = True
@@ -979,7 +981,7 @@ if __name__ == "__main__":
     elif operation == 'reci-project':
         if parameter == 'k':
             test_capacity_in_reciprocal_projection_as_a_function_of_capk_size_with_linear_classifier([
-                20, 240], plot_name='%s.pdf' % (plot), num_trials=ntrials, residual_reci_project=skipConnection, classifier=False, use_average=True)
+                20, 240], plot_name='%s.pdf' % (plot), num_trials=ntrials, residual_reci_project=skipConnection, classifier=False, use_average=True, transpose_weight=transposeWeight)
         if parameter == 'n':
             test_capacity_in_reciprocal_projection_as_a_function_of_brain_size_with_linear_classifier(
                 [100, 800], num_trials=ntrials, nrecurrent_rounds=5, plot_name='%s.pdf' % (plot), residual_reci_project=skipConnection, classifier=False, use_average=True, transpose_weight=transposeWeight)
