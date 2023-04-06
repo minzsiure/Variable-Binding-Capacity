@@ -34,17 +34,18 @@ python run_grand_capacity.py --operation project --parameter k --ntrials 5 --plo
 ```
 
 Note that `skipConnection` is a `bool`, indicating whether to do direct decoder (skip connection) from area 0 to area 2.
+Including `--skipConnection` makes it True, and excluding it makes it False.
 
 We also note that reci-project is noisier than project in general, so one can consider to relax the threadhold when searching capacity. Here, we only include the non-relaxed threadhold.
 
 **Run reci-project wrt to n**
 ```
-python run_grand_capacity.py --operation reci-project --parameter n --ntrials 5 --plot plot1 --skipConnection True --transposeWeight False
+python run_grand_capacity.py --operation reci-project --parameter n --ntrials 5 --plot plot1 --skipConnection
 ```
 
 **Run reci-project wrt to k**
 ```
-python run_grand_capacity.py --operation reci-project --parameter k --ntrials 5 --plot plot1 --skipConnection True --transposeWeight False
+python run_grand_capacity.py --operation reci-project --parameter k --ntrials 5 --plot plot1 --skipConnection
 ```
 
 To reproduce the SVD distance plot:
