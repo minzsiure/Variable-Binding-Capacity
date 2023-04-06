@@ -247,8 +247,6 @@ def multiround_test_capacity_using_reciprocal_projection_with_linear_classifier(
 
         for iiter in range(nrounds):  # do hebbian learning using nrounds samples
             x = np.random.binomial(1, class_dist)
-            if residual_reci_project and transpose_weight:
-                assert "invalid"
             if residual_reci_project:
                 # print('skip connection')
                 _, _, _, _, _, _, y2, y3 = brain.residual_reciprocal_project(x, area1_index=0, area2_index=1, area3_index=2,
@@ -969,6 +967,8 @@ if __name__ == "__main__":
 
     print('transposeWeight==', transposeWeight)
     print('skipConnection==', skipConnection)
+    if transposeWeight and skipConnection:
+        raise Exception
 
     if operation == "project":
         # project wrt k
