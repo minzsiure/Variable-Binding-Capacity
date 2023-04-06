@@ -257,10 +257,10 @@ def multiround_test_capacity_using_reciprocal_projection_with_linear_classifier(
                                                                              only_once=True)  # keep activations un-wiped
             elif transpose_weight:
                 # print('transpose connection')
-                _, _, _, _, _, _, y2, y3 = brain.transpose_reciprocal_project(x, area1_index=0, area2_index=1, area3_index=2,
-                                                                              max_iterations=1, verbose=0,
-                                                                              return_weights_assembly=True,
-                                                                              only_once=True)  # keep activations un-wiped
+                _, _, _, _, _, y2, y3 = brain.transpose_reciprocal_project(x, area1_index=0, area2_index=1, area3_index=2,
+                                                                           max_iterations=1, verbose=0,
+                                                                           return_weights_assembly=True,
+                                                                           only_once=True)  # keep activations un-wiped
             else:
                 # print('vanilla model')
                 _, _, _, _, _, y2, y3 = brain.reciprocal_project(x, area1_index=0, area2_index=1, area3_index=2,
@@ -953,10 +953,10 @@ if __name__ == "__main__":
                         required=True, help="number of trials")
     parser.add_argument("--plot", type=str, required=True,
                         help="name of the plot")
-    parser.add_argument("--skipConnection", type=bool,
-                        required=True, help="whether to use skip connection")
-    parser.add_argument("--transposeWeight", type=bool,
-                        required=True, help="whether to set W2to3=W3to2.T")
+    parser.add_argument("--skipConnection", action='store_true',
+                        required=False, help="whether to use skip connection")
+    parser.add_argument("--transposeWeight", action='store_true',
+                        required=False, help="whether to set W2to3=W3to2.T")
 
     args = parser.parse_args()
     # Access the variables
@@ -966,6 +966,9 @@ if __name__ == "__main__":
     plot = args.plot
     skipConnection = args.skipConnection
     transposeWeight = args.transposeWeight
+
+    print('transposeWeight==', transposeWeight)
+    print('skipConnection==', skipConnection)
 
     if operation == "project":
         # project wrt k
