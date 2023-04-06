@@ -55,7 +55,7 @@ print("calculating svd and distances")
 Uxy, Sxy, Vxyt = np.linalg.svd(W_xy2)
 Uzy, Szy, Vzyt = np.linalg.svd(W_zy2)
 Uxz, Sxz, Vxzt = np.linalg.svd(W_xz2)
-Uyz, Syz, Vyzt = np.linalg.svd(W_zy2)
+Uyz, Syz, Vyzt = np.linalg.svd(W_yz2)
 Uyr, Syr, Vyrt = np.linalg.svd(W_yy2)
 Uzr, Szr, Vzrt = np.linalg.svd(W_zz2)
 
