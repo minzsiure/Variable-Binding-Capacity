@@ -1,7 +1,7 @@
 This repository contains the code for reproducing experiments conducted in our paper:
 
 **Through the Lens of Emergent Associative Memories: Skip Connections Increase the Capacity of Variable Binding Mechanisms**
-Yi Xie$^*$, Yichen Li$^*$, Akshay Rangamani, Tomaso Poggio
+Yi Xie*, Yichen Li*, Akshay Rangamani, Tomaso Poggio
 
 The emergence of Associative Memories in Assembly Calculus and the evaluation of its capacity with respect to model parameters, brain size ($n$) and cap size ($k$), along with a newly introduced model: *variable binding* (**VB**) with *skip connection*.
 
