@@ -1,6 +1,6 @@
 This repository contains the code for reproducing experiments conducted in our paper:
 
-**Through the Lens of Emergent Associative Memories: \\
+**Through the Lens of Emergent Associative Memories: <br>
 Skip Connections Increase the Capacity of Variable Binding Mechanisms**
 
 Yi Xie*, Yichen Li*, Akshay Rangamani, Tomaso Poggio
