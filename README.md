@@ -13,7 +13,7 @@ Yi Xie*, Yichen Li*, Akshay Rangamani, Tomaso Poggio
 
 ### brain.py 
 Define `Brain` (class), which consists of several `Area` (class). 
-Many important operations in Assembly Calculus, such as `projection` and `reciprocal_projection` are defined.
+Many important operations in Assembly Calculus, such as $\texttt{projection}$ and $\texttt{reciprocal_projection}$ are defined.
 
 ### area.py
 Define `Area` (class), which is where assemblies are formed.
@@ -31,27 +31,27 @@ Run `Assembly_Recall.ipynb`.
 `run_grand_capacity.py` measures the capacity of Assembly Calculus in terms of `n` and `k`.
 To run, use the following command:
 
-**Run projection wrt to n**
+**Run $\texttt{projection}$ wrt to $n$**
 ```
 python run_grand_capacity.py --operation project --parameter n --ntrials 5 --plot plot1 --skipConnection True --transposeWeight False
 ```
 
-**Run projection wrt to k**
+**Run $\texttt{projection}$ wrt to $k$**
 ```
 python run_grand_capacity.py --operation project --parameter k --ntrials 5 --plot plot1 --skipConnection True --transposeWeight False
 ```
 
-Note that `skipConnection` is a `bool` flag, indicating whether to do direct decoder (skip connection) from area 0 to area 2.
+> Note that `skipConnection` is a `bool` flag, indicating whether to do direct decoder (skip connection) from area 0 to area 2.
 Including `--skipConnection` makes it True, and excluding it makes it False.
 
-We also note that reci-project is noisier than project in general, so one can consider to relax the threadhold when searching capacity. Here, we only include the non-relaxed threadhold.
+> We also note that $\texttt{reciprocal_projection}$ is noisier than $\texttt{projection}$ in general, so one can consider to relax the threadhold when searching capacity. Here, we only include the non-relaxed threadhold.
 
-**Run reci-project wrt to n**
+**Run $\texttt{reciprocal_projection}$ wrt to $n$**
 ```
 python run_grand_capacity.py --operation reci-project --parameter n --ntrials 5 --plot plot1 --skipConnection
 ```
 
-**Run reci-project wrt to k**
+**Run $\texttt{reciprocal_projection}$ wrt to $k$**
 ```
 python run_grand_capacity.py --operation reci-project --parameter k --ntrials 5 --plot plot1 --skipConnection
 ```
