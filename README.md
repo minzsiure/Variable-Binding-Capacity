@@ -31,12 +31,12 @@ Run `Assembly_Recall.ipynb`.
 `run_grand_capacity.py` measures the capacity of Assembly Calculus in terms of `n` and `k`.
 To run, use the following command:
 
-**Run $\texttt{projection}$ wrt to $n$**
+**Run $\texttt{project}$ wrt to $n$**
 ```
 python run_grand_capacity.py --operation project --parameter n --ntrials 5 --plot plot1 --skipConnection True --transposeWeight False
 ```
 
-**Run $\texttt{projection}$ wrt to $k$**
+**Run $\texttt{project}$ wrt to $k$**
 ```
 python run_grand_capacity.py --operation project --parameter k --ntrials 5 --plot plot1 --skipConnection True --transposeWeight False
 ```
@@ -44,14 +44,14 @@ python run_grand_capacity.py --operation project --parameter k --ntrials 5 --plo
 > Note that `skipConnection` is a `bool` flag, indicating whether to do direct decoder (skip connection) from area 0 to area 2.
 Including `--skipConnection` makes it True, and excluding it makes it False.
 
-> We also note that $\texttt{reciprocal_projection}$ is noisier than $\texttt{projection}$ in general, so one can consider to relax the threadhold when searching capacity. Here, we only include the non-relaxed threadhold.
+> We also note that $\texttt{reciprocal-project}$ is noisier than $\texttt{project}$ in general, so one can consider to relax the threadhold when searching capacity. Here, we only include the non-relaxed threadhold.
 
-**Run $\texttt{reciprocal_projection}$ wrt to $n$**
+**Run $\texttt{reciprocal-project}$ wrt to $n$**
 ```
 python run_grand_capacity.py --operation reci-project --parameter n --ntrials 5 --plot plot1 --skipConnection
 ```
 
-**Run $\texttt{reciprocal_projection}$ wrt to $k$**
+**Run $\texttt{reciprocal-project}$ wrt to $k$**
 ```
 python run_grand_capacity.py --operation reci-project --parameter k --ntrials 5 --plot plot1 --skipConnection
 ```
