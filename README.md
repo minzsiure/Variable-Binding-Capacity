@@ -1,7 +1,7 @@
 # Variable-Binding-Capacity
 The emergence of Associative Memories in Assembly Calculus and the evaluation of its capacity with respect to model parameters, brain size ($n$) and cap size ($k$), along with a newly introduced model: *variable binding* (**VB**) with *skip connection*.
 
-## Documentation on files for basic setup
+## A) Documentation on files for basic setup
 
 brain.py 
 ---
@@ -20,11 +20,11 @@ utils.py
 ---
 Define commonly used functions such as `capk`, `hebbian_update`, `find_feedforward_matrix_index`, `generate_labels`.
 
-## A) To reproduce Assembly Recall experiments:
+## B) To reproduce Assembly Recall experiments:
 ---
 Run `Assembly_Recall.ipynb`.
 
-## B) To reproduce the model capacity:
+## C) To reproduce the model capacity:
 ---
 `run_grand_capacity.py` measures the capacity of Assembly Calculus in terms of `n` and `k`.
 To run, use the following command:
@@ -54,6 +54,6 @@ python run_grand_capacity.py --operation reci-project --parameter n --ntrials 5 
 python run_grand_capacity.py --operation reci-project --parameter k --ntrials 5 --plot plot1 --skipConnection
 ```
 
-## C) To reproduce the SVD distance plot:
+## D) To reproduce the SVD distance plot:
 ---
 Run `python svd_plot/cns_fig1.py`
