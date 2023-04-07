@@ -13,7 +13,7 @@ Yi Xie*, Yichen Li*, Akshay Rangamani, Tomaso Poggio
 
 ### brain.py 
 Define `Brain` (class), which consists of several `Area` (class). 
-Many important operations in Assembly Calculus, such as $\texttt{projection}$ and $\texttt{reciprocal_projection}$ are defined.
+Many important operations in Assembly Calculus, such as $\texttt{project}$ and $\texttt{reciprocal-project}$ are defined.
 
 ### area.py
 Define `Area` (class), which is where assemblies are formed.
