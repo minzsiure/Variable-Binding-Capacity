@@ -29,7 +29,7 @@ def multiround_test_capacity_using_projection_with_linear_classifier(num_neurons
                                                                      with_normalization=True, wipe_y=True,
                                                                      nrecurrent_rounds=5, classifier=False, show_input_overlap=False):
     '''
-    This function measures in- and out- class similaritiy of stimuli and assembly under projection.
+    This function measures in- and out- class similaritiy of stimuli and assembly under projection, 1 --> 2.
     nrounds: number of examples from each class shown to the brain during hebbian traing.
             At the test time, connections are fixed.
     m: size of coreset, default m=k
@@ -193,6 +193,249 @@ def compute_min_diagonal_and_max_offDiagonal(matrix):
     return round(min_diagonal, 2), round(max_off_diagonal, 2)
 
 
+def multiround_test_capacity_using_double_projection_with_linear_classifier(num_neurons=1000, nrounds=5, beta=0.1,
+                                                                            nclasses=6, m=None,
+                                                                            k=100, connection_p=0.1, r=0.9, q=0.1, num_samples=50,
+                                                                            with_normalization=True, wipe_y=True,
+                                                                            nrecurrent_rounds=5, classifier=False, show_input_overlap=False):
+    '''
+    This function measures in- and out- class similaritiy of stimuli and assembly under double projection, 1 --> 2 --> 3.
+    nrounds: number of examples from each class shown to the brain during hebbian traing.
+            At the test time, connections are fixed.
+    m: size of coreset, default m=k
+    r: probability of firing within coreset
+    q: probability of firing outside coreset
+    plot_overlap: plot assembly confusion matrix, stimuli confusion matrix.
+    num_samples: number of samples for testing per class.
+    classifier: when set to true, we evaluate with a linear classifier as well.
+    with_normalization: when set to true, we normalize weights after training per class.
+    return 2 things:
+        * average of within class similarity
+        * average of outside class similarity
+    '''
+    print('double aaaaaaaaaa!!!!!!!!!')
+    # brain initialization
+    num_neurons_per_class = k if m == None else m
+
+    brain = Brain(num_areas=3, n=num_neurons, beta=beta,
+                  p=connection_p, k=k)
+    if with_normalization:
+        brain.normalize_connections()
+
+    # stimuli initialization: prepare input for later testing (NOT learning)
+    n_samples = num_samples
+    stimuli_coreset = Stimuli(
+        num_neurons=num_neurons, nclasses=nclasses, nsamples=num_samples, m=m, r=r, q=q, k=k)
+
+    # **Here is input for later testing**
+    if classifier:
+        inputs_to_train = stimuli_coreset.generate_stimuli_set()
+    inputs_to_test = stimuli_coreset.generate_stimuli_set()
+
+    distributions = stimuli_coreset.get_distributions()
+
+    """learning in nrounds x --> Y"""
+    for iclass in range(nclasses):
+        # print('\tcurrent class', iclass)
+        if wipe_y:
+            brain.wipe_all_activations()
+
+        # generate class distributions
+        class_dist = distributions[iclass]
+
+        for iiter in range(nrounds):  # do hebbian learning using nrounds samples
+            x = np.random.binomial(1, class_dist)
+            _, _, y = brain.project(x, from_area_index=0, to_area_index=1,
+                                    max_iterations=1, verbose=0, return_stable_rank=False,
+                                    return_weights_assembly=True,
+                                    only_once=True)  # keep activations un-wiped
+        if with_normalization:
+            brain.normalize_connections()  # normalize after each class
+
+    output_assemblies_left = use_stimuli_form_assembly_stack_and_classify_in_projection(stimuli_coreset, brain, nclasses, [
+        (0, 1), (0, 1)], n_samples, nrecurrent_rounds, num_neurons, k, return_accuracy='assemblies')
+
+    """learning in nrounds Y --> Z"""
+    for iclass in range(nclasses):
+        brain.wipe_all_activations()
+        # do hebbian learning using nrounds samples
+        for iiter in range(nrounds):
+            # generate a random integer from 0 to n_samples
+            left_set_index = random.randint(0, 3)
+            left_index = random.randint(0, n_samples-1)
+
+            # this x is an assembly formed
+            x_to_left = output_assemblies_left[left_set_index][iclass, left_index]
+            _, _, _ = brain.project(x_to_left, from_area_index=1, to_area_index=2,
+                                    max_iterations=1, verbose=0, return_stable_rank=False,
+                                    return_weights_assembly=True,
+                                    only_once=True)  # keep activations un-wiped
+
+        brain.normalize_connections()  # normalize
+
+    # we store the output here
+    if classifier:
+        outputs_from_train_Y = np.zeros(
+            (nclasses, n_samples, num_neurons))
+        outputs_from_train_Z = np.zeros(
+            (nclasses, n_samples, num_neurons))
+
+    outputs_from_test_Y = np.zeros(
+        (nclasses, n_samples, num_neurons))
+    outputs_from_test_Z = np.zeros(
+        (nclasses, n_samples, num_neurons))
+
+    # find feedforward connection with info provided inpaired_areas
+    iweights_1to2 = find_feedforward_matrix_index(
+        brain.area_combinations, 0, 1)
+    iweights_2to3 = find_feedforward_matrix_index(
+        brain.area_combinations, 1, 2)
+
+    # form assembly 1-->2
+    for j in range(nclasses):
+        for isample in range(n_samples):
+            if classifier:
+                temp_area2_activations_train = outputs_from_train_Y[j, isample]
+
+            temp_area2_activations_test = outputs_from_test_Y[j, isample]
+
+            # present multiple rounds to utilize recurrent connections, as defined by `nrecurrent_rounds`
+            for iround in range(nrecurrent_rounds):
+                if classifier:
+                    temp_area2_activations_train = capk(brain.feedforward_connections[iweights_1to2].dot(inputs_to_train[j, isample])
+                                                        + brain.areas[1].recurrent_connections.dot(temp_area2_activations_train),
+                                                        k)
+
+                temp_area2_activations_test = capk(brain.feedforward_connections[iweights_1to2].dot(inputs_to_test[j, isample])
+                                                   + brain.areas[1].recurrent_connections.dot(temp_area2_activations_test),
+                                                   k)
+            if classifier:
+                outputs_from_train_Y[j, isample] = temp_area2_activations_train
+
+            outputs_from_test_Y[j, isample] = temp_area2_activations_test
+    # form assembly 2-->3
+    for j in range(nclasses):
+        for isample in range(n_samples):
+            if classifier:
+                temp_area3_activations_train = outputs_from_train_Z[j, isample]
+
+            temp_area3_activations_test = outputs_from_test_Z[j, isample]
+
+            # present multiple rounds to utilize recurrent connections, as defined by `nrecurrent_rounds`
+            for iround in range(nrecurrent_rounds):
+                if classifier:
+                    temp_area3_activations_train = capk(brain.feedforward_connections[iweights_2to3].dot(outputs_from_train_Y[j, isample])
+                                                        + brain.areas[2].recurrent_connections.dot(temp_area3_activations_train),
+                                                        k)
+
+                temp_area3_activations_test = capk(brain.feedforward_connections[iweights_2to3].dot(outputs_from_test_Y[j, isample])
+                                                   + brain.areas[2].recurrent_connections.dot(temp_area3_activations_test),
+                                                   k)
+            if classifier:
+                outputs_from_train_Z[j, isample] = temp_area3_activations_train
+
+            outputs_from_test_Z[j, isample] = temp_area3_activations_test
+
+    # stack over all assemblies
+    if classifier:
+        output_from_train_stack_Y = np.vstack(tuple([np.vstack(tuple(
+            [outputs_from_train_Y[j, i] for i in range(n_samples)])) for j in range(nclasses)]))
+        output_from_test_stack_Y = np.vstack(tuple([np.vstack(tuple(
+            [outputs_from_test_Y[j, i] for i in range(n_samples)])) for j in range(nclasses)]))
+        output_from_train_stack_Z = np.vstack(tuple([np.vstack(tuple(
+            [outputs_from_train_Z[j, i] for i in range(n_samples)])) for j in range(nclasses)]))
+        output_from_test_stack_Z = np.vstack(tuple([np.vstack(tuple(
+            [outputs_from_test_Z[j, i] for i in range(n_samples)])) for j in range(nclasses)]))
+
+    ########## compute overlap ############
+    # compute input overlap
+    if show_input_overlap:
+        inp_overlap_mat = np.sum(np.mean(
+            inputs_to_test[:, :-1][:, np.newaxis, :] * inputs_to_test[:, 1:][np.newaxis, :, :], axis=2), axis=-1)
+        inp_overlap_mat = inp_overlap_mat / num_neurons_per_class * 100
+
+    # compute assembly overlap
+    assm_overlap_mat_Y = np.sum(np.mean(
+        outputs_from_test_Y[:, :-1][:, np.newaxis, :] * outputs_from_test_Y[:, 1:][np.newaxis, :, :], axis=2), axis=-1)
+    assm_overlap_mat_Y = assm_overlap_mat_Y / k * 100
+
+    assm_overlap_mat_Z = np.sum(np.mean(
+        outputs_from_test_Z[:, :-1][:, np.newaxis, :] * outputs_from_test_Z[:, 1:][np.newaxis, :, :], axis=2), axis=-1)
+    assm_overlap_mat_Z = assm_overlap_mat_Z / k * 100
+    ############################################
+
+    ########## compute average ############
+    # avg of inside class similarity
+    avg_assm_overlap_within_class_Y = np.trace(assm_overlap_mat_Y)/nclasses
+    # avg of outside class similarity
+    avg_assm_overlap_outside_class_Y = (np.sum(assm_overlap_mat_Y) -
+                                        np.trace(assm_overlap_mat_Y))/(nclasses*(nclasses-1))
+    # avg of inside class similarity
+    avg_assm_overlap_within_class_Z = np.trace(assm_overlap_mat_Z)/nclasses
+    # avg of outside class similarity
+    avg_assm_overlap_outside_class_Z = (np.sum(assm_overlap_mat_Z) -
+                                        np.trace(assm_overlap_mat_Z))/(nclasses*(nclasses-1))
+
+    if show_input_overlap:
+        # avg of inside class similarity
+        avg_sim_overlap_within_class = np.trace(inp_overlap_mat)/nclasses
+        # avg of outside class similarity
+        avg_sim_overlap_outside_class = (np.sum(inp_overlap_mat) -
+                                         np.trace(inp_overlap_mat))/(nclasses*(nclasses-1))
+        print('\taverage stimuli within class overlap %.2f, average stimuli OUTSIDE class overlap %.2f' % (
+            avg_sim_overlap_within_class, avg_sim_overlap_outside_class))
+
+    print('\tY: average assembly within class overlap %.2f, average assembly OUTSIDE class overlap %.2f' % (
+        avg_assm_overlap_within_class_Y, avg_assm_overlap_outside_class_Y))
+    print('\tZ: average assembly within class overlap %.2f, average assembly OUTSIDE class overlap %.2f' % (
+        avg_assm_overlap_within_class_Z, avg_assm_overlap_outside_class_Z))
+
+    ##################classifier##########################
+    if classifier:
+        # generate labels
+        y_label = generate_labels(nclasses, n_samples)
+        # fit a classifier
+        classifier_Y = LogisticRegression(
+            solver='liblinear', max_iter=80)
+        classifier_Z = LogisticRegression(
+            solver='liblinear', max_iter=80)
+
+        classifier_Y.fit(output_from_train_stack_Y, y_label)
+        fit_acc = classifier_Y.score(output_from_train_stack_Y, y_label)
+        eval_acc = classifier_Y.score(output_from_test_stack_Y, y_label)
+        print('\tY: %i classes. fit acc is %.4f, eval acc is %.4f, chance is %.4f' %
+              (nclasses, fit_acc, eval_acc, 1/nclasses))
+
+        classifier_Z.fit(output_from_train_stack_Z, y_label)
+        fit_acc = classifier_Z.score(output_from_train_stack_Z, y_label)
+        eval_acc = classifier_Z.score(output_from_test_stack_Z, y_label)
+        print('\tZ: %i classes. fit acc is %.4f, eval acc is %.4f, chance is %.4f' %
+              (nclasses, fit_acc, eval_acc, 1/nclasses))
+
+        # print('\t%i classes. Fit Accuracy of L1 on Y1 is %.4f (expecting 1)' %
+        #       (nclasses, fit_acc))
+        # print('\t%i classes. Evaluation Accuracy of L1 on Y1 prime is %.4f (expecting 1)' %
+        #       (nclasses, eval_acc))
+
+    return round(avg_assm_overlap_outside_class_Y, 2), round(avg_assm_overlap_within_class_Y, 2), round(avg_assm_overlap_outside_class_Z, 2), round(avg_assm_overlap_within_class_Z, 2)
+
+
+def compute_min_diagonal_and_max_offDiagonal(matrix):
+    """
+    Given a matrix, 
+    compute the minimum of diagonal elements and maximum of off diagonal elements.
+    """
+    # get diagonal elements and compute the minimum
+    diagonal = np.diag(matrix)
+    min_diagonal = np.min(diagonal)
+
+    # get off-diagonal elements and compute the maximum
+    off_diagonal = matrix[~np.eye(matrix.shape[0], dtype=bool)]
+    max_off_diagonal = np.max(off_diagonal)
+
+    return round(min_diagonal, 2), round(max_off_diagonal, 2)
+
+
 def multiround_test_capacity_using_reciprocal_projection_with_linear_classifier(num_neurons=1000, nrounds=5, beta=0.1,
                                                                                 nclasses=6, m=None,
                                                                                 k=50, connection_p=0.1, r=0.9, q=0.01, num_samples=50,
@@ -201,7 +444,7 @@ def multiround_test_capacity_using_reciprocal_projection_with_linear_classifier(
                                                                                 show_input_overlap=False, use_average=True,
                                                                                 transpose_weight=False):
     '''
-    This function measures in- and out- class similaritiy of stimuli and assembly under reciprocal-projection.
+    This function measures in- and out- class similaritiy of stimuli and assembly under reciprocal-projection, 1 --> 2 <--> 3.
     nrounds: number of examples from each class shown to the brain during hebbian traing.
             At the test time, connections are fixed.
     m: size of coreset, default m=k
@@ -716,7 +959,7 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_brain_size_with_line
                                                                                               nrecurrent_rounds=5, num_trials=5,
                                                                                               plot_all=True, plot_name='plot1.pdf', residual_reci_project=False,
                                                                                               classifier=False, show_input_overlap=False, use_average=True,
-                                                                                              transpose_weight=False):
+                                                                                              transpose_weight=False, type='reci-project'):
     '''
     We test for capacity in assembly calculus with respect to 
     confusion between average in- and out- class similarity
@@ -746,14 +989,23 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_brain_size_with_line
             while True:
                 print('num_neurons='+str(n)+', k='+str(k)+', m=' +
                       str(k)+', nclasses='+str(try_class), 'current trial', itrial)
-                overlap_outside_class_Y, overlap_within_class_Y, overlap_outside_class_Z,  overlap_within_class_Z = multiround_test_capacity_using_reciprocal_projection_with_linear_classifier(num_neurons=n, nrounds=nrounds, beta=beta,
+                if type == 'reci-project':
+                    overlap_outside_class_Y, overlap_within_class_Y, overlap_outside_class_Z,  overlap_within_class_Z = multiround_test_capacity_using_reciprocal_projection_with_linear_classifier(num_neurons=n, nrounds=nrounds, beta=beta,
+                                                                                                                                                                                                    nclasses=try_class, m=m,
+                                                                                                                                                                                                    k=k, connection_p=connection_p, r=r, q=q,
+                                                                                                                                                                                                    num_samples=num_samples,
+                                                                                                                                                                                                    with_normalization=with_normalization, wipe_y=wipe_y,
+                                                                                                                                                                                                    nrecurrent_rounds=nrecurrent_rounds, residual_reci_project=residual_reci_project,
+                                                                                                                                                                                                    classifier=classifier, show_input_overlap=show_input_overlap, use_average=use_average,
+                                                                                                                                                                                                    transpose_weight=transpose_weight)
+                if type == 'double-project':
+                    overlap_outside_class_Y, overlap_within_class_Y, overlap_outside_class_Z,  overlap_within_class_Z = multiround_test_capacity_using_double_projection_with_linear_classifier(num_neurons=n, nrounds=nrounds, beta=beta,
                                                                                                                                                                                                 nclasses=try_class, m=m,
                                                                                                                                                                                                 k=k, connection_p=connection_p, r=r, q=q,
                                                                                                                                                                                                 num_samples=num_samples,
                                                                                                                                                                                                 with_normalization=with_normalization, wipe_y=wipe_y,
-                                                                                                                                                                                                nrecurrent_rounds=nrecurrent_rounds, residual_reci_project=residual_reci_project,
-                                                                                                                                                                                                classifier=classifier, show_input_overlap=show_input_overlap, use_average=use_average,
-                                                                                                                                                                                                transpose_weight=transpose_weight)
+                                                                                                                                                                                                nrecurrent_rounds=nrecurrent_rounds,
+                                                                                                                                                                                                classifier=classifier, show_input_overlap=show_input_overlap)
                 if not obtain_capacity_of_Y and overlap_within_class_Y <= overlap_outside_class_Y:
                     avg_capacity_Y.append(try_class)
                     obtain_capacity_of_Y = True
@@ -836,7 +1088,7 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_capk_size_with_linea
                                                                                              nrecurrent_rounds=5, num_trials=5,
                                                                                              plot_all=True, plot_name='plot1.pdf',  residual_reci_project=False,
                                                                                              classifier=False, show_input_overlap=False, use_average=True,
-                                                                                             transpose_weight=False):
+                                                                                             transpose_weight=False, type='reci-project'):
     '''
     We test for capacity in assembly calculus with respect to 
     confusion between average in- and out- class similarity
@@ -866,14 +1118,23 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_capk_size_with_linea
                 print('k='+str(k)+', m=' +
                       str(m)+', nclasses='+str(try_class))
                 print('current trial', itrial)
-                overlap_outside_class_Y, overlap_within_class_Y, overlap_outside_class_Z,  overlap_within_class_Z = multiround_test_capacity_using_reciprocal_projection_with_linear_classifier(num_neurons=num_neurons, nrounds=nrounds, beta=beta,
+                if type == 'reci-project':
+                    overlap_outside_class_Y, overlap_within_class_Y, overlap_outside_class_Z,  overlap_within_class_Z = multiround_test_capacity_using_reciprocal_projection_with_linear_classifier(num_neurons=num_neurons, nrounds=nrounds, beta=beta,
+                                                                                                                                                                                                    nclasses=try_class, m=m,
+                                                                                                                                                                                                    k=k, connection_p=connection_p, r=r, q=q,
+                                                                                                                                                                                                    num_samples=num_samples,
+                                                                                                                                                                                                    with_normalization=with_normalization, wipe_y=wipe_y,
+                                                                                                                                                                                                    nrecurrent_rounds=nrecurrent_rounds, residual_reci_project=residual_reci_project,
+                                                                                                                                                                                                    classifier=classifier, show_input_overlap=show_input_overlap,
+                                                                                                                                                                                                    use_average=use_average, transpose_weight=transpose_weight)
+                if type == 'double-project':
+                    overlap_outside_class_Y, overlap_within_class_Y, overlap_outside_class_Z,  overlap_within_class_Z = multiround_test_capacity_using_double_projection_with_linear_classifier(num_neurons=num_neurons, nrounds=nrounds, beta=beta,
                                                                                                                                                                                                 nclasses=try_class, m=m,
                                                                                                                                                                                                 k=k, connection_p=connection_p, r=r, q=q,
                                                                                                                                                                                                 num_samples=num_samples,
                                                                                                                                                                                                 with_normalization=with_normalization, wipe_y=wipe_y,
-                                                                                                                                                                                                nrecurrent_rounds=nrecurrent_rounds, residual_reci_project=residual_reci_project,
-                                                                                                                                                                                                classifier=classifier, show_input_overlap=show_input_overlap,
-                                                                                                                                                                                                use_average=use_average, transpose_weight=transpose_weight)
+                                                                                                                                                                                                nrecurrent_rounds=nrecurrent_rounds,
+                                                                                                                                                                                                classifier=classifier, show_input_overlap=show_input_overlap)
                 if not obtain_capacity_of_Y and overlap_within_class_Y <= overlap_outside_class_Y:
                     avg_capacity_Y.append(try_class)
                     obtain_capacity_of_Y = True
@@ -955,6 +1216,8 @@ if __name__ == "__main__":
                         required=False, help="whether to use skip connection")
     parser.add_argument("--transposeWeight", action='store_true',
                         required=False, help="whether to set W2to3=W3to2.T")
+    parser.add_argument("--opType", type=str, required=True,
+                        help="reci-project, double-project, or project")
 
     args = parser.parse_args()
     # Access the variables
@@ -964,9 +1227,11 @@ if __name__ == "__main__":
     plot = args.plot
     skipConnection = args.skipConnection
     transposeWeight = args.transposeWeight
+    op_type = args.opType
 
     print('transposeWeight==', transposeWeight)
     print('skipConnection==', skipConnection)
+    print('op_type==', op_type)
     if transposeWeight and skipConnection:
         raise Exception
 
@@ -984,7 +1249,9 @@ if __name__ == "__main__":
     elif operation == 'reci-project':
         if parameter == 'k':
             test_capacity_in_reciprocal_projection_as_a_function_of_capk_size_with_linear_classifier([
-                20, 240], plot_name='%s.pdf' % (plot), num_trials=ntrials, residual_reci_project=skipConnection, classifier=False, use_average=True, transpose_weight=transposeWeight)
+                20, 240], plot_name='%s.pdf' % (plot), num_trials=ntrials, residual_reci_project=skipConnection,
+                classifier=False, use_average=True, transpose_weight=transposeWeight, type=op_type)
         if parameter == 'n':
             test_capacity_in_reciprocal_projection_as_a_function_of_brain_size_with_linear_classifier(
-                [100, 800], num_trials=ntrials, nrecurrent_rounds=5, plot_name='%s.pdf' % (plot), residual_reci_project=skipConnection, classifier=False, use_average=True, transpose_weight=transposeWeight)
+                [100, 800], num_trials=ntrials, nrecurrent_rounds=5, plot_name='%s.pdf' % (plot), residual_reci_project=skipConnection,
+                classifier=False, use_average=True, transpose_weight=transposeWeight, type=op_type)

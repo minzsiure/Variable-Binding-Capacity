@@ -61,7 +61,7 @@ def hamming_distance(vec1, vec2):
 def use_stimuli_form_assembly_stack_and_classify_in_projection(stimuli_coreset, brain_initial,
                                                                nclasses, paired_areas, n_samples=50,
                                                                nrecurrent_rounds=5, num_neurons=1000, k=100,
-                                                               return_accuracy='test', verbose=True):
+                                                               return_accuracy='test', verbose=False):
     """
     Input:  stimuli_coreset (Stimuli object)
             brain (Brain object)
