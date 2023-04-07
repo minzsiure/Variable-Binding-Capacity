@@ -3,21 +3,17 @@ The emergence of Associative Memories in Assembly Calculus and the evaluation of
 
 ## A) Documentation on files for basic setup
 
-brain.py 
----
+### brain.py 
 Define `Brain` (class), which consists of several `Area` (class). 
 Many important operations in Assembly Calculus, such as `projection` and `reciprocal_projection` are defined.
 
-area.py
----
+### area.py
 Define `Area` (class), which is where assemblies are formed.
 
-stimuli.py
----
+### stimuli.py
 Given number of classes and number of samples per class, generate a stimuli matrix with dimension (`self.nclasses`, `self.nsamples`, `self.num_neurons`)
 
-utils.py
----
+### utils.py
 Define commonly used functions such as `capk`, `hebbian_update`, `find_feedforward_matrix_index`, `generate_labels`.
 
 ## B) To reproduce Assembly Recall experiments:
