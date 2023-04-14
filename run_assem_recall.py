@@ -190,7 +190,7 @@ def experiment_on_assembly_recall_by_perturb_r(num_neurons=1000, nrounds=5, beta
         plt.xlabel('Probability of coreset firing $(r)$ after perturbation')
     elif X == 'coreset':
         plt.xlabel('Hamming distance between coresets')
-    plt.ylabel('$dH(Y_0, Y$')
+    plt.ylabel('$dH(Y_0, Y)$ in $\%$')
     plt.show()
 
 

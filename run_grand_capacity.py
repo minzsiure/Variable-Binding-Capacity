@@ -25,7 +25,7 @@ under both projection and reciprocal projection.
 
 def multiround_test_capacity_using_projection_with_linear_classifier(num_neurons=1000, nrounds=5, beta=0.1,
                                                                      nclasses=6, m=None,
-                                                                     k=100, connection_p=0.1, r=0.9, q=0.1, num_samples=50,
+                                                                     k=100, connection_p=0.1, r=0.9, q=0.01, num_samples=50,
                                                                      with_normalization=True, wipe_y=True,
                                                                      nrecurrent_rounds=5, classifier=False, show_input_overlap=False):
     '''
@@ -195,7 +195,7 @@ def compute_min_diagonal_and_max_offDiagonal(matrix):
 
 def multiround_test_capacity_using_double_projection_with_linear_classifier(num_neurons=1000, nrounds=5, beta=0.1,
                                                                             nclasses=6, m=None,
-                                                                            k=100, connection_p=0.1, r=0.9, q=0.1, num_samples=50,
+                                                                            k=100, connection_p=0.1, r=0.9, q=0.01, num_samples=50,
                                                                             with_normalization=True, wipe_y=True,
                                                                             nrecurrent_rounds=5, classifier=False, show_input_overlap=False):
     '''
