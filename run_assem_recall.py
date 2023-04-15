@@ -145,7 +145,7 @@ def experiment_on_assembly_recall_by_perturb_r(num_neurons=1000, nrounds=5, beta
     for recurr in [True, False]:
         print(recurr)
         for i, new_r in enumerate(rs):
-            print(new_r)
+            print('t', new_r)
             result_for_this_r = np.zeros((nclasses, ntrials))
             for itrial in range(ntrials):
                 median_hamming_dist = assembly_recall_by_perturb_X(new_r, num_neurons=num_neurons, nrounds=nrounds, beta=beta,

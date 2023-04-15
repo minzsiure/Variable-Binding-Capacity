@@ -187,4 +187,4 @@ def experiment_on_pattern_completion(alpha, num_neurons=1000, beta=0.1,
 
 if __name__ == "__main__":
     experiment_on_pattern_completion(
-        0.5, nclasses=2)
+        0.6, nclasses=2, ntrials=10)
