@@ -24,8 +24,12 @@ Given number of classes and number of samples per class, generate a stimuli matr
 ### utils.py
 Define commonly used functions such as `capk`, `hebbian_update`, `find_feedforward_matrix_index`, `generate_labels`.
 
-## B) To reproduce Assembly Recall experiments:
-Run `Assembly_Recall.ipynb`.
+## B1) To reproduce Pattern Completion experiments:
+Run  `run_pattern_completion.py`.
+
+## B2) To reproduce Assembly Recall experiments:
+Run `Assembly_Recall.ipynb` for singular class implementation.
+Run `run_assem_recall.py` for multiclass implementations.
 
 ## C) To reproduce the model capacity:
 `run_grand_capacity.py` measures the capacity of Assembly Calculus in terms of `n` and `k`.
