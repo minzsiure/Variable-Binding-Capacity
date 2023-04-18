@@ -6,6 +6,7 @@ Skip Connections Increase the Capacity of Variable Binding Mechanisms**
 Yi Xie $^{1*}$, Yichen Li $^{2*}$, Akshay Rangamani $^{1}$, Tomaso Poggio $^{1}$
 
 $^1$ Center for Brains, Minds, and Machines,  Massachusetts Institute of Technology
+
 $^2$ Department of Psychology, Harvard University
 
 **In brief:** 
