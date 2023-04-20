@@ -979,7 +979,8 @@ def test_capacity_in_projection_as_a_function_of_p_with_linear_classifier(prange
             try_class = global_starting_classes
             print('==================================================')
             while True:
-                print('p='+str(p)+', nclasses='+str(try_class))
+                print('n='+str(num_neurons),'k='+str(k), 'beta='+str(beta), 'p=' +
+                      str(p)+', nclasses='+str(try_class))
                 print('current trial', itrial)
                 avg_assm_overlap_outside_class, avg_assm_overlap_within_class = multiround_test_capacity_using_projection_with_linear_classifier(num_neurons=num_neurons, nrounds=nrounds, beta=beta,
                                                                                                                                                  nclasses=try_class, m=m,
