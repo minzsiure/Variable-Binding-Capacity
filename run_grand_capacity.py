@@ -879,7 +879,7 @@ def test_capacity_in_projection_as_a_function_of_beta_with_linear_classifier(bet
     try [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
     '''
     result = []
-    global_starting_classes = 10
+    global_starting_classes = 2
 
     concat = np.zeros((len(betarange), num_trials))
     count = 0
@@ -953,7 +953,94 @@ def test_capacity_in_projection_as_a_function_of_beta_with_linear_classifier(bet
     return res_Y_mean, res_Y_sem
 
 
-def test_capacity_in_reciprocal_projection_as_a_function_of_brain_size_with_linear_classifier(nrange, nrounds=5, beta=0.1, m=None,
+def test_capacity_in_projection_as_a_function_of_p_with_linear_classifier(prange, k=50, num_neurons=250, nrounds=5, m=50,
+                                                                          r=0.9, q=0.01, beta=0.1,
+                                                                          num_samples=50, with_normalization=True, wipe_y=True,
+                                                                          nrecurrent_rounds=5, num_trials=5,
+                                                                          plot_all=True, plot_name='plot1.pdf'):
+    '''
+    We test for capacity in assembly calculus with respect to 
+    confusion between average in- and out- class similarity
+    as a function of p.
+    When the average of out-class similarity exceeds or equal to in-class similarity,
+    the assembly model hits its capacity (catastrophic forgetting). 
+    '''
+    result = []
+    global_starting_classes = 2
+
+    concat = np.zeros((len(prange), num_trials))
+    count = 0
+    # assume linearity, each class will start with previous
+    for p in prange:
+        print('******* searching with %.4f for beta **********' % (beta))
+        avg_capacity = []
+
+        for itrial in range(num_trials):
+            try_class = global_starting_classes
+            print('==================================================')
+            while True:
+                print('p='+str(p)+', nclasses='+str(try_class))
+                print('current trial', itrial)
+                avg_assm_overlap_outside_class, avg_assm_overlap_within_class = multiround_test_capacity_using_projection_with_linear_classifier(num_neurons=num_neurons, nrounds=nrounds, beta=beta,
+                                                                                                                                                 nclasses=try_class, m=m,
+                                                                                                                                                 k=k, connection_p=p, r=r, q=q,
+                                                                                                                                                 num_samples=num_samples,
+                                                                                                                                                 with_normalization=with_normalization, wipe_y=wipe_y,
+                                                                                                                                                 nrecurrent_rounds=nrecurrent_rounds)
+                if avg_assm_overlap_within_class <= avg_assm_overlap_outside_class:
+                    avg_capacity.append(try_class)
+                    print()
+                    break
+                else:
+                    try_class += 1
+                    print()
+            print('==================================================')
+        result.append(round(np.median(avg_capacity)))
+        concat[count] = avg_capacity
+
+        count += 1
+        # global_starting_classes = round(np.median(avg_capacity))
+
+    if plot_all:
+        Y_mean = np.round(np.median(concat, axis=1))
+        # print('compare should be equal', Y_mean, result_Y)
+        Y_sem = np.std(concat, axis=1)/np.sqrt(num_trials)
+
+        x = prange
+
+        # m1, b1 = np.polyfit(x, Y_mean, 1)
+
+        plt.plot(
+            x, Y_mean)
+        plt.fill_between(x, Y_mean - Y_sem, Y_mean +
+                         Y_sem, alpha=0.5)
+        # plt.legend()
+        res_Y_mean = {key: value for key, value in zip(x, Y_mean)}
+        res_Y_sem = {key: value for key, value in zip(x, Y_sem)}
+        print(concat)
+        print('mean', res_Y_mean)
+        print('sem', res_Y_sem)
+
+        plt.title(
+            'Projection. \nn=%i, k=m=%i, beta=%.2f, nrecurrent=%i, q=%.2f, ntrials=%i' % (num_neurons, k, beta, nrecurrent_rounds, q, num_trials))
+        plt.xlabel('p')
+        plt.ylabel('Capacity (number of classes)')
+
+        # save figure
+        output_directory = 'figures/project_capacity/capacity_wrt_p/'
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+            print(f"Created directory: {output_directory}")
+        else:
+            print(f"Directory already exists: {output_directory}")
+        output_filepath = output_directory + plot_name
+        plt.savefig(output_filepath, format='pdf')
+
+        plt.show()
+    return res_Y_mean, res_Y_sem
+
+
+def test_capacity_in_reciprocal_projection_as_a_function_of_brain_size_with_linear_classifier(nrange, nrounds=5, beta=0.01, m=None,
                                                                                               k=50, connection_p=0.1, r=0.9, q=0.01,
                                                                                               num_samples=50, with_normalization=True, wipe_y=True,
                                                                                               nrecurrent_rounds=5, num_trials=5,
@@ -1207,7 +1294,7 @@ if __name__ == "__main__":
     parser.add_argument("--operation", type=str, required=True,
                         help="Operations names (project or reci-project)")
     parser.add_argument("--parameter", type=str,
-                        required=True, help="Parameter names (n or k)")
+                        required=True, help="Parameter names (n or k or p)")
     parser.add_argument("--ntrials", type=int,
                         required=True, help="number of trials")
     parser.add_argument("--plot", type=str, required=True,
@@ -1244,6 +1331,9 @@ if __name__ == "__main__":
         if parameter == 'n':
             test_capacity_in_projection_as_a_function_of_brain_size_with_linear_classifier(
                 [100, 800], num_trials=ntrials, q=0.01, plot_name='%s.pdf' % (plot), show_input_overlap=False, classifier=False)
+        if parameter == 'p':
+            test_capacity_in_projection_as_a_function_of_p_with_linear_classifier(
+                [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 0.8],  num_trials=ntrials, q=0.01, plot_name='%s.pdf' % (plot), num_neurons=1000)
 
     # # reciprocal-project
     elif operation == 'reci-project':

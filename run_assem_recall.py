@@ -166,23 +166,29 @@ def experiment_on_assembly_recall_by_perturb_r(num_neurons=1000, nrounds=5, beta
     sem_without_recurr = np.std(
         results_without_recurr, axis=1)/np.sqrt(ntrials)
 
-    colors = cm.get_cmap('Set1', 9)
+    colors = cm.get_cmap('flare', nclasses)
     # plot each class
     for recurr in [True, False]:
         for iclass in range(median_with_recurr.shape[0]):
             if recurr:
-                label = "Class %i with Recurrence" % (iclass)
+                # label = "Class %i with Recurrence" % (iclass)
+                label = "With Recurrence" % (iclass)
                 y = median_with_recurr[iclass, :]
                 y_sem = sem_with_recurr[iclass, :]
                 line_shape = '-'
             else:
-                label = "Class %i without Recurrence" % (iclass)
+                # label = "Class %i without Recurrence" % (iclass)
+                label = "Without Recurrence" % (iclass)
                 y = median_without_recurr[iclass, :]
                 y_sem = sem_without_recurr[iclass, :]
                 line_shape = '--'
 
-            plt.plot(
-                rs, y, label=label, color=colors(iclass), linestyle=line_shape)
+            if iclass == 0:
+                plt.plot(
+                    rs, y, label=label, color=colors(iclass), linestyle=line_shape)
+            else:
+                plt.plot(
+                    rs, y, color=colors(iclass), linestyle=line_shape)
             plt.fill_between(rs, y - y_sem, y + y_sem,
                              alpha=0.25, color=colors(iclass), edgecolor='none')
     plt.legend()
@@ -197,4 +203,4 @@ def experiment_on_assembly_recall_by_perturb_r(num_neurons=1000, nrounds=5, beta
 if __name__ == "__main__":
     # print(assembly_recall_by_perturb_X(5, X='coreset'))
     experiment_on_assembly_recall_by_perturb_r(
-        nclasses=2, k=100, nsamples=50, nrecurrent_rounds=5, nrounds=15, X='r', ntrials=5)
+        nclasses=10, k=100, nsamples=50, nrecurrent_rounds=5, nrounds=15, X='r', ntrials=5)
