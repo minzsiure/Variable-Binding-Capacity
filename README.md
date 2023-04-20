@@ -1,11 +1,20 @@
 This repository contains the code for reproducing experiments conducted in our paper:
 
-**Through the Lens of Emergent Associative Memories: <br>
-Skip Connections Increase the Capacity of Variable Binding Mechanisms**
+**Skip Connections Increase the Capacity of <br>
+Associative Memories in Variable Binding Mechanisms**
 
-Yi Xie*, Yichen Li*, Akshay Rangamani, Tomaso Poggio
+Yi Xie $^{1*}$, Yichen Li $^{2*}$, Akshay Rangamani $^{1}$, Tomaso Poggio $^{1}$
 
-**In brief:** we study the two classic operations in Assembly Calculus, $\texttt{project}$ and $\texttt{reciprocal-project}$. In particular, $\texttt{project}$ is used as a baseline for $\texttt{reciprocal-project}$. We establish that Associative Memories emerge in Assembly Calculus through Hebbian Learning with a stream of stimuli drawn from the same distribution; further, this phenomenon generalizes to multiple classes of stimuli (**see D**). Additionally, we discuss the role of homeostasis (normalization) within the spectral structure and that recurrent connections make the assembly model significantly more robust (**see B**). In light of this establishment, we measure the capacity of Associative Memories in Assembly Calculus as a function of model parameter $N$, number of neurons in each brain area, and $K$, the maximum number of active neurons in an area at any time (**see C**). We discuss the phenomenon of cascading capacity of assemblies over hierarchical brain areas. Lastly, we further leverage our knowledge of $\texttt{reciprocal-project}$'s hypothesized biological role in variable binding mechanisms to propose an addition of $\textit{skip connection}$. This addition allows a direct access to the pointer variable by the sensory input, which increases the capacity by an order of magnitude as a way to tackle the challenges caused by the aforementioned phenomenon. 
+$^1$ Center for Brains, Minds, and Machines,  Massachusetts Institute of Technology
+
+$^2$ Department of Psychology, Harvard University
+
+**In brief:** 
+The flexibility of intelligent behavior is fundamentally attributed to the ability to separate and assign structural information from content in sensory inputs. Variable binding is the atomic computation that underlies this ability. In this work, we investigate the implementation of variable binding via pointers of assemblies of neurons, which are sets of excitatory neurons that fire together. The Assembly Calculus is a framework that describes a set of operations to create and modify assemblies of neurons. We focus on the $\texttt{Reciprocal-Project}$ operation (which performs variable binding) and study the capacity of a network in terms of the number of assemblies that can be reliably created and retrieved. We find that variable binding networks (Fig A2) implemented through Hebbian plasticity resemble associative memories (Fig B). However, for networks with $N$ neurons per brain area, the capacity of variable binding ($0.01N$) is an order of magnitude lower than the capacity of simple assembly creation ($0.22N$) through the $\texttt{Project}$ operation (Fig A1). To alleviate this drop in capacity, we propose a $\textit{skip connection}$ between the input and variable assembly, which boosts the capacity to a similar order of magnitude ($0.1N$) as the $\texttt{Project}$ operation.
+
+![](https://i.imgur.com/9AWmr4T.png)
+
+**(A1)** Project operation. **(A2)** Variable Binding with optional skip connection (dotted arrow). **(B)** Associative memory structure displayed as the distance between Singular Vectors (SVs) of neural connections and assemblies. **(C)** Capacity of Variable Binding as a function of N without (blue) and with skip connection (red) which boosts the capacity, and baseline capacity of $\texttt{project}$ (orange). **(D)** Capacity as a function of cap size $K$.
 
 ---
 
