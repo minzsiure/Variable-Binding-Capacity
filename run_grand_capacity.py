@@ -979,7 +979,7 @@ def test_capacity_in_projection_as_a_function_of_p_with_linear_classifier(prange
             try_class = global_starting_classes
             print('==================================================')
             while True:
-                print('n='+str(num_neurons),'k='+str(k), 'beta='+str(beta), 'p=' +
+                print('n='+str(num_neurons), 'k='+str(k), 'beta='+str(beta), 'p=' +
                       str(p)+', nclasses='+str(try_class))
                 print('current trial', itrial)
                 avg_assm_overlap_outside_class, avg_assm_overlap_within_class = multiround_test_capacity_using_projection_with_linear_classifier(num_neurons=num_neurons, nrounds=nrounds, beta=beta,
@@ -1306,6 +1306,8 @@ if __name__ == "__main__":
                         required=False, help="whether to set W2to3=W3to2.T")
     parser.add_argument("--opType", type=str, required=True,
                         help="reci-project, double-project, or project")
+    parser.add_argument("--num_neurons", type=int, required=True,
+                        help="number of neurons")
 
     args = parser.parse_args()
     # Access the variables
@@ -1316,10 +1318,12 @@ if __name__ == "__main__":
     skipConnection = args.skipConnection
     transposeWeight = args.transposeWeight
     op_type = args.opType
+    num_neurons = args.num_neurons
 
     print('transposeWeight==', transposeWeight)
     print('skipConnection==', skipConnection)
     print('op_type==', op_type)
+    print('num_neurons == ', num_neurons)
     if transposeWeight and skipConnection:
         raise Exception
 
@@ -1334,7 +1338,7 @@ if __name__ == "__main__":
                 [100, 800], num_trials=ntrials, q=0.01, plot_name='%s.pdf' % (plot), show_input_overlap=False, classifier=False)
         if parameter == 'p':
             test_capacity_in_projection_as_a_function_of_p_with_linear_classifier(
-                [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 0.8],  num_trials=ntrials, q=0.01, plot_name='%s.pdf' % (plot), num_neurons=1000)
+                [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 0.8],  num_trials=ntrials, q=0.01, plot_name='%s.pdf' % (plot), num_neurons=num_neurons)
 
     # # reciprocal-project
     elif operation == 'reci-project':

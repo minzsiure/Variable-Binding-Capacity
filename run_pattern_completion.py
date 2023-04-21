@@ -150,7 +150,7 @@ def experiment_on_pattern_completion(alpha, num_neurons=1000, beta=0.1,
     """
     Experiment run by calling list of perturb_r values.
     """
-    nroundss = np.linspace(4, 14, 10).astype(int)
+    nroundss = np.linspace(1, 14, 14).astype(int)
     results = np.zeros(
         (nclasses, ntrials, len(nroundss)))
 
@@ -168,18 +168,20 @@ def experiment_on_pattern_completion(alpha, num_neurons=1000, beta=0.1,
     median = np.round(np.median(results, axis=1))
     sem = np.std(results, axis=1)/np.sqrt(ntrials)
 
-    colors = cm.get_cmap('Set1', 9)
+    colors = cm.get_cmap('flare', nclasses)
     # plot each class
     for iclass in range(results.shape[0]):
         label = "Class %i" % (iclass)
         y = median[iclass, :]
         y_sem = sem[iclass, :]
 
+        # plt.plot(
+        #     nroundss, y, label=label, color=colors(iclass))
         plt.plot(
-            nroundss, y, label=label, color=colors(iclass))
+            nroundss, y, color=colors(iclass))
         plt.fill_between(nroundss, y - y_sem, y + y_sem,
                          alpha=0.25, color=colors(iclass), edgecolor='none')
-    plt.legend()
+    # plt.legend()
     plt.xlabel('Learning time per class')
     plt.ylabel('Percentage assembly recovered')
     plt.show()
@@ -187,4 +189,4 @@ def experiment_on_pattern_completion(alpha, num_neurons=1000, beta=0.1,
 
 if __name__ == "__main__":
     experiment_on_pattern_completion(
-        0.6, nclasses=2, ntrials=10)
+        0.6, nclasses=10, ntrials=5)

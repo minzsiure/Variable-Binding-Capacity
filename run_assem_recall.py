@@ -172,13 +172,13 @@ def experiment_on_assembly_recall_by_perturb_r(num_neurons=1000, nrounds=5, beta
         for iclass in range(median_with_recurr.shape[0]):
             if recurr:
                 # label = "Class %i with Recurrence" % (iclass)
-                label = "With Recurrence" % (iclass)
+                label = "With Recurrence"
                 y = median_with_recurr[iclass, :]
                 y_sem = sem_with_recurr[iclass, :]
                 line_shape = '-'
             else:
                 # label = "Class %i without Recurrence" % (iclass)
-                label = "Without Recurrence" % (iclass)
+                label = "Without Recurrence"
                 y = median_without_recurr[iclass, :]
                 y_sem = sem_without_recurr[iclass, :]
                 line_shape = '--'
@@ -203,4 +203,4 @@ def experiment_on_assembly_recall_by_perturb_r(num_neurons=1000, nrounds=5, beta
 if __name__ == "__main__":
     # print(assembly_recall_by_perturb_X(5, X='coreset'))
     experiment_on_assembly_recall_by_perturb_r(
-        nclasses=10, k=100, nsamples=50, nrecurrent_rounds=5, nrounds=15, X='r', ntrials=5)
+        nclasses=10, k=100, nsamples=50, nrecurrent_rounds=5, nrounds=15, X='coreset', ntrials=5)
