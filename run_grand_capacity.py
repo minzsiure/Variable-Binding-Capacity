@@ -1306,7 +1306,7 @@ if __name__ == "__main__":
                         required=False, help="whether to set W2to3=W3to2.T")
     parser.add_argument("--opType", type=str, required=True,
                         help="reci-project, double-project, or project")
-    parser.add_argument("--num_neurons", type=int, required=True,
+    parser.add_argument("--num_neurons", type=int, required=False, default=1000,
                         help="number of neurons")
 
     args = parser.parse_args()
@@ -1331,7 +1331,7 @@ if __name__ == "__main__":
         # project wrt k
         if parameter == 'k':
             test_capacity_in_projection_as_a_function_of_capk_size_with_linear_classifier([
-                20, 240], plot_name='%s.pdf' % (plot), num_trials=ntrials)
+                20, 240], plot_name='%s.pdf' % (plot), num_trials=ntrials, num_neurons=num_neurons)
         # project wrt n
         if parameter == 'n':
             test_capacity_in_projection_as_a_function_of_brain_size_with_linear_classifier(
@@ -1345,7 +1345,7 @@ if __name__ == "__main__":
         if parameter == 'k':
             test_capacity_in_reciprocal_projection_as_a_function_of_capk_size_with_linear_classifier([
                 20, 240], plot_name='%s.pdf' % (plot), num_trials=ntrials, residual_reci_project=skipConnection,
-                classifier=False, use_average=True, transpose_weight=transposeWeight, type=op_type)
+                classifier=False, use_average=True, transpose_weight=transposeWeight, type=op_type, num_neurons=num_neurons)
         if parameter == 'n':
             test_capacity_in_reciprocal_projection_as_a_function_of_brain_size_with_linear_classifier(
                 [100, 800], num_trials=ntrials, nrecurrent_rounds=5, plot_name='%s.pdf' % (plot), residual_reci_project=skipConnection,
