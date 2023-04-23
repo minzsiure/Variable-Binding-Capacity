@@ -957,11 +957,11 @@ def test_capacity_in_projection_as_a_function_of_p_with_linear_classifier(prange
                                                                           r=0.9, q=0.01, beta=0.1,
                                                                           num_samples=50, with_normalization=True, wipe_y=True,
                                                                           nrecurrent_rounds=5, num_trials=5,
-                                                                          plot_all=True, plot_name='plot1.pdf'):
+                                                                          plot_all=True, plot_name='plot1.pdf', classifier=False):
     '''
     We test for capacity in assembly calculus with respect to 
     confusion between average in- and out- class similarity
-    as a function of p.
+    as a function of connection rate p.
     When the average of out-class similarity exceeds or equal to in-class similarity,
     the assembly model hits its capacity (catastrophic forgetting). 
     '''
@@ -972,7 +972,7 @@ def test_capacity_in_projection_as_a_function_of_p_with_linear_classifier(prange
     count = 0
     # assume linearity, each class will start with previous
     for p in prange:
-        print('******* searching with %.4f for beta **********' % (beta))
+        print('******* searching with %.4f for p **********' % (p))
         avg_capacity = []
 
         for itrial in range(num_trials):
@@ -987,7 +987,7 @@ def test_capacity_in_projection_as_a_function_of_p_with_linear_classifier(prange
                                                                                                                                                  k=k, connection_p=p, r=r, q=q,
                                                                                                                                                  num_samples=num_samples,
                                                                                                                                                  with_normalization=with_normalization, wipe_y=wipe_y,
-                                                                                                                                                 nrecurrent_rounds=nrecurrent_rounds)
+                                                                                                                                                 nrecurrent_rounds=nrecurrent_rounds, classifier=classifier)
                 if avg_assm_overlap_within_class <= avg_assm_overlap_outside_class:
                     avg_capacity.append(try_class)
                     print()
@@ -1055,7 +1055,6 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_brain_size_with_line
     When the average of out-class similarity exceeds or equal to in-class similarity,
     the assembly model hits its capacity (catastrophic forgetting). 
     '''
-    # result_Y, result_Z = [], []
     global_starting_classes = 2
 
     concat_Y = np.zeros(
@@ -1232,7 +1231,7 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_capk_size_with_linea
                     obtain_capacity_of_Z = True
                 if obtain_capacity_of_Y and obtain_capacity_of_Z:
                     print('Y found: ', obtain_capacity_of_Y,
-                          '.Z found: ', obtain_capacity_of_Z)
+                          '. Z found: ', obtain_capacity_of_Z)
                     print()
                     break
                 else:
@@ -1277,6 +1276,123 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_capk_size_with_linea
 
         # save figure
         output_directory = 'figures/reciprocal_project_capacity/capacity_wrt_k/'
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+            print(f"Created directory: {output_directory}")
+        else:
+            print(f"Directory already exists: {output_directory}")
+        output_filepath = output_directory + plot_name
+        plt.savefig(output_filepath, format='pdf')
+
+        plt.show()
+    return res_Y_mean, res_Y_sem, res_Z_mean, res_Z_sem
+
+
+def test_capacity_in_reciprocal_projection_as_a_function_of_p_with_linear_classifier(prange, num_neurons=250, k=50, nrounds=5, beta=0.1,
+                                                                                     m=50, r=0.9, q=0.01,
+                                                                                     num_samples=50, with_normalization=True, wipe_y=True,
+                                                                                     nrecurrent_rounds=5, num_trials=5,
+                                                                                     plot_all=True, plot_name='plot1.pdf',  residual_reci_project=False,
+                                                                                     classifier=False, show_input_overlap=False, use_average=True,
+                                                                                     transpose_weight=False, type='reci-project'):
+    '''
+    We test for capacity in assembly calculus with respect to 
+    confusion between average in- and out- class similarity
+    as a function of connection rate p.
+    When the average of out-class similarity exceeds or equal to in-class similarity,
+    the assembly model hits its capacity (catastrophic forgetting). 
+    '''
+    global_starting_classes = 2
+
+    concat_Y = np.zeros((len(prange), num_trials))
+    concat_Z = np.zeros((len(prange), num_trials))
+
+    count = 0
+    # assume linearity, each class will start with previous
+    for p in prange:
+        print('******* searching with %.4f for p connection **********' % (p))
+        avg_capacity_Y = []
+        avg_capacity_Z = []
+
+        for itrial in range(num_trials):
+            try_class = global_starting_classes
+            obtain_capacity_of_Y, obtain_capacity_of_Z = False, False
+            print('==================================================')
+            while True:
+                print('n='+str(num_neurons), 'k='+str(k), 'beta='+str(beta), 'p=' +
+                      str(p)+', nclasses='+str(try_class))
+                print('current trial', itrial)
+                if type == 'reci-project':
+                    overlap_outside_class_Y, overlap_within_class_Y, overlap_outside_class_Z,  overlap_within_class_Z = multiround_test_capacity_using_reciprocal_projection_with_linear_classifier(num_neurons=num_neurons, nrounds=nrounds, beta=beta,
+                                                                                                                                                                                                    nclasses=try_class, m=m,
+                                                                                                                                                                                                    k=k, connection_p=p, r=r, q=q,
+                                                                                                                                                                                                    num_samples=num_samples,
+                                                                                                                                                                                                    with_normalization=with_normalization, wipe_y=wipe_y,
+                                                                                                                                                                                                    nrecurrent_rounds=nrecurrent_rounds, residual_reci_project=residual_reci_project,
+                                                                                                                                                                                                    classifier=classifier, show_input_overlap=show_input_overlap,
+                                                                                                                                                                                                    use_average=use_average, transpose_weight=transpose_weight)
+                if type == 'double-project':
+                    overlap_outside_class_Y, overlap_within_class_Y, overlap_outside_class_Z,  overlap_within_class_Z = multiround_test_capacity_using_double_projection_with_linear_classifier(num_neurons=num_neurons, nrounds=nrounds, beta=beta,
+                                                                                                                                                                                                nclasses=try_class, m=m,
+                                                                                                                                                                                                k=k, connection_p=p, r=r, q=q,
+                                                                                                                                                                                                num_samples=num_samples,
+                                                                                                                                                                                                with_normalization=with_normalization, wipe_y=wipe_y,
+                                                                                                                                                                                                nrecurrent_rounds=nrecurrent_rounds,
+                                                                                                                                                                                                classifier=classifier, show_input_overlap=show_input_overlap)
+                if not obtain_capacity_of_Y and overlap_within_class_Y <= overlap_outside_class_Y:
+                    avg_capacity_Y.append(try_class)
+                    obtain_capacity_of_Y = True
+                    # break
+                if not obtain_capacity_of_Z and overlap_within_class_Z <= overlap_outside_class_Z:
+                    avg_capacity_Z.append(try_class)
+                    obtain_capacity_of_Z = True
+                if obtain_capacity_of_Y and obtain_capacity_of_Z:
+                    print('Y found: ', obtain_capacity_of_Y,
+                          '. Z found: ', obtain_capacity_of_Z)
+                    print()
+                    break
+                else:
+                    print('Y found: ', obtain_capacity_of_Y,
+                          '. Z found: ', obtain_capacity_of_Z)
+                    print()
+                    try_class += 1
+            print('==================================================')
+        concat_Y[count] = avg_capacity_Y
+        concat_Z[count] = avg_capacity_Z
+        count += 1
+
+    if plot_all:
+        Y_mean = np.round(np.median(concat_Y, axis=1))
+        Y_sem = np.std(concat_Y, axis=1)/np.sqrt(num_trials)
+        Z_mean = np.round(np.median(concat_Z, axis=1))
+        Z_sem = np.std(concat_Z, axis=1)/np.sqrt(num_trials)
+
+        x = prange
+
+        plt.plot(
+            x, Y_mean, label="Area 1")
+        plt.fill_between(x, Y_mean - Y_sem, Y_mean +
+                         Y_sem, alpha=0.5)
+        plt.plot(
+            x, Z_mean, label="Area 2")
+        plt.fill_between(x, Z_mean - Z_sem, Z_mean +
+                         Z_sem, alpha=0.5)
+        plt.legend()
+
+        res_Y_mean = {key: value for key, value in zip(x, Y_mean)}
+        res_Y_sem = {key: value for key, value in zip(x, Y_sem)}
+        res_Z_mean = {key: value for key, value in zip(x, Z_mean)}
+        res_Z_sem = {key: value for key, value in zip(x, Z_sem)}
+        print('Y.', concat_Y)
+        print('Z.', concat_Z)
+
+        plt.title(
+            'Reciprocal Projection. \nn=%i, beta=%.1f, nrecurrent=%i, q=%.2f, ntrials=%i, m=%i' % (num_neurons, beta, nrecurrent_rounds, q, num_trials, m))
+        plt.xlabel('Capk size')
+        plt.ylabel('Capacity (number of classes)')
+
+        # save figure
+        output_directory = 'figures/reciprocal_project_capacity/capacity_wrt_p/'
         if not os.path.exists(output_directory):
             os.makedirs(output_directory)
             print(f"Created directory: {output_directory}")
@@ -1338,15 +1454,19 @@ if __name__ == "__main__":
                 [100, 800], num_trials=ntrials, q=0.01, plot_name='%s.pdf' % (plot), show_input_overlap=False, classifier=False)
         if parameter == 'p':
             test_capacity_in_projection_as_a_function_of_p_with_linear_classifier(
-                [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 0.8],  num_trials=ntrials, q=0.01, plot_name='%s.pdf' % (plot), num_neurons=num_neurons)
+                [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 0.8],  num_trials=ntrials, q=0.01, plot_name='%s.pdf' % (plot), num_neurons=num_neurons, classifier=False)
 
     # # reciprocal-project
     elif operation == 'reci-project':
         if parameter == 'k':
             test_capacity_in_reciprocal_projection_as_a_function_of_capk_size_with_linear_classifier([
                 20, 240], plot_name='%s.pdf' % (plot), num_trials=ntrials, residual_reci_project=skipConnection,
-                classifier=False, use_average=True, transpose_weight=transposeWeight, type=op_type, num_neurons=num_neurons)
+                classifier=False, use_average=True, type=op_type, num_neurons=num_neurons)
         if parameter == 'n':
             test_capacity_in_reciprocal_projection_as_a_function_of_brain_size_with_linear_classifier(
                 [100, 800], num_trials=ntrials, nrecurrent_rounds=5, plot_name='%s.pdf' % (plot), residual_reci_project=skipConnection,
-                classifier=False, use_average=True, transpose_weight=transposeWeight, type=op_type)
+                classifier=False, use_average=True, type=op_type)
+        if parameter == 'p':
+            test_capacity_in_reciprocal_projection_as_a_function_of_capk_size_with_linear_classifier(
+                [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 0.8], plot_name='%s.pdf' % (plot), num_trials=ntrials, residual_reci_project=skipConnection,
+                classifier=False, use_average=True, type=op_type, num_neurons=num_neurons)
