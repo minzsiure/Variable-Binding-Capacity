@@ -442,7 +442,7 @@ def multiround_test_capacity_using_reciprocal_projection_with_linear_classifier(
                                                                                 with_normalization=True, wipe_y=True,
                                                                                 nrecurrent_rounds=5, residual_reci_project=False, classifier=False,
                                                                                 show_input_overlap=False, use_average=True,
-                                                                                transpose_weight=False):
+                                                                                ):
     '''
     This function measures in- and out- class similaritiy of stimuli and assembly under reciprocal-projection, 1 --> 2 <--> 3.
     nrounds: number of examples from each class shown to the brain during hebbian traing.
@@ -496,12 +496,6 @@ def multiround_test_capacity_using_reciprocal_projection_with_linear_classifier(
                                                                              max_iterations=1, verbose=0,
                                                                              return_weights_assembly=True,
                                                                              only_once=True)  # keep activations un-wiped
-            elif transpose_weight:
-                # print('transpose connection')
-                _, _, _, _, _, y2, y3 = brain.transpose_reciprocal_project(x, area1_index=0, area2_index=1, area3_index=2,
-                                                                           max_iterations=1, verbose=0,
-                                                                           return_weights_assembly=True,
-                                                                           only_once=True)  # keep activations un-wiped
             else:
                 # print('vanilla model')
                 _, _, _, _, _, y2, y3 = brain.reciprocal_project(x, area1_index=0, area2_index=1, area3_index=2,
@@ -1046,8 +1040,7 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_brain_size_with_line
                                                                                               num_samples=50, with_normalization=True, wipe_y=True,
                                                                                               nrecurrent_rounds=5, num_trials=5,
                                                                                               plot_all=True, plot_name='plot1.pdf', residual_reci_project=False,
-                                                                                              classifier=False, show_input_overlap=False, use_average=True,
-                                                                                              transpose_weight=False, type='reci-project'):
+                                                                                              classifier=False, show_input_overlap=False, use_average=True, type='reci-project'):
     '''
     We test for capacity in assembly calculus with respect to 
     confusion between average in- and out- class similarity
@@ -1084,7 +1077,7 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_brain_size_with_line
                                                                                                                                                                                                     with_normalization=with_normalization, wipe_y=wipe_y,
                                                                                                                                                                                                     nrecurrent_rounds=nrecurrent_rounds, residual_reci_project=residual_reci_project,
                                                                                                                                                                                                     classifier=classifier, show_input_overlap=show_input_overlap, use_average=use_average,
-                                                                                                                                                                                                    transpose_weight=transpose_weight)
+                                                                                                                                                                                                    )
                 if type == 'double-project':
                     overlap_outside_class_Y, overlap_within_class_Y, overlap_outside_class_Z,  overlap_within_class_Z = multiround_test_capacity_using_double_projection_with_linear_classifier(num_neurons=n, nrounds=nrounds, beta=beta,
                                                                                                                                                                                                 nclasses=try_class, m=m,
@@ -1175,7 +1168,7 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_capk_size_with_linea
                                                                                              nrecurrent_rounds=5, num_trials=5,
                                                                                              plot_all=True, plot_name='plot1.pdf',  residual_reci_project=False,
                                                                                              classifier=False, show_input_overlap=False, use_average=True,
-                                                                                             transpose_weight=False, type='reci-project'):
+                                                                                             type='reci-project'):
     '''
     We test for capacity in assembly calculus with respect to 
     confusion between average in- and out- class similarity
@@ -1213,7 +1206,7 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_capk_size_with_linea
                                                                                                                                                                                                     with_normalization=with_normalization, wipe_y=wipe_y,
                                                                                                                                                                                                     nrecurrent_rounds=nrecurrent_rounds, residual_reci_project=residual_reci_project,
                                                                                                                                                                                                     classifier=classifier, show_input_overlap=show_input_overlap,
-                                                                                                                                                                                                    use_average=use_average, transpose_weight=transpose_weight)
+                                                                                                                                                                                                    use_average=use_average)
                 if type == 'double-project':
                     overlap_outside_class_Y, overlap_within_class_Y, overlap_outside_class_Z,  overlap_within_class_Z = multiround_test_capacity_using_double_projection_with_linear_classifier(num_neurons=num_neurons, nrounds=nrounds, beta=beta,
                                                                                                                                                                                                 nclasses=try_class, m=m,
@@ -1294,7 +1287,7 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_p_with_linear_classi
                                                                                      nrecurrent_rounds=5, num_trials=5,
                                                                                      plot_all=True, plot_name='plot1.pdf',  residual_reci_project=False,
                                                                                      classifier=False, show_input_overlap=False, use_average=True,
-                                                                                     transpose_weight=False, type='reci-project'):
+                                                                                     type='reci-project'):
     '''
     We test for capacity in assembly calculus with respect to 
     confusion between average in- and out- class similarity
@@ -1330,7 +1323,7 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_p_with_linear_classi
                                                                                                                                                                                                     with_normalization=with_normalization, wipe_y=wipe_y,
                                                                                                                                                                                                     nrecurrent_rounds=nrecurrent_rounds, residual_reci_project=residual_reci_project,
                                                                                                                                                                                                     classifier=classifier, show_input_overlap=show_input_overlap,
-                                                                                                                                                                                                    use_average=use_average, transpose_weight=transpose_weight)
+                                                                                                                                                                                                    use_average=use_average)
                 if type == 'double-project':
                     overlap_outside_class_Y, overlap_within_class_Y, overlap_outside_class_Z,  overlap_within_class_Z = multiround_test_capacity_using_double_projection_with_linear_classifier(num_neurons=num_neurons, nrounds=nrounds, beta=beta,
                                                                                                                                                                                                 nclasses=try_class, m=m,
@@ -1418,11 +1411,9 @@ if __name__ == "__main__":
                         help="name of the plot")
     parser.add_argument("--skipConnection", action='store_true',
                         required=False, help="whether to use skip connection")
-    parser.add_argument("--transposeWeight", action='store_true',
-                        required=False, help="whether to set W2to3=W3to2.T")
     parser.add_argument("--opType", type=str, required=True,
                         help="reci-project, double-project, or project")
-    parser.add_argument("--num_neurons", type=int, required=False, default=1000,
+    parser.add_argument("--num_neurons", type=int, required=False, default=250,
                         help="number of neurons")
 
     args = parser.parse_args()
@@ -1432,16 +1423,12 @@ if __name__ == "__main__":
     ntrials = args.ntrials
     plot = args.plot
     skipConnection = args.skipConnection
-    transposeWeight = args.transposeWeight
     op_type = args.opType
     num_neurons = args.num_neurons
 
-    print('transposeWeight==', transposeWeight)
     print('skipConnection==', skipConnection)
     print('op_type==', op_type)
     print('num_neurons == ', num_neurons)
-    if transposeWeight and skipConnection:
-        raise Exception
 
     if operation == "project":
         # project wrt k
