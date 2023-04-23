@@ -1454,6 +1454,6 @@ if __name__ == "__main__":
                 [100, 800], num_trials=ntrials, nrecurrent_rounds=5, plot_name='%s.pdf' % (plot), residual_reci_project=skipConnection,
                 classifier=False, use_average=True, type=op_type)
         if parameter == 'p':
-            test_capacity_in_reciprocal_projection_as_a_function_of_capk_size_with_linear_classifier(
+            test_capacity_in_reciprocal_projection_as_a_function_of_p_with_linear_classifier(
                 [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 0.8], plot_name='%s.pdf' % (plot), num_trials=ntrials, residual_reci_project=skipConnection,
                 classifier=False, use_average=True, type=op_type, num_neurons=num_neurons)
