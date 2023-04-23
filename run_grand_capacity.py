@@ -1411,7 +1411,7 @@ if __name__ == "__main__":
                         help="name of the plot")
     parser.add_argument("--skipConnection", action='store_true',
                         required=False, help="whether to use skip connection")
-    parser.add_argument("--opType", type=str, required=True,
+    parser.add_argument("--opType", type=str, required=False, default='reci-project',
                         help="reci-project, double-project, or project")
     parser.add_argument("--num_neurons", type=int, required=False, default=250,
                         help="number of neurons")
