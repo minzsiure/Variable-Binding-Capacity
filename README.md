@@ -46,12 +46,17 @@ To run, use the following command:
 
 **Run $\texttt{project}$ wrt to $n$**
 ```
-python run_grand_capacity.py --operation project --parameter n --ntrials 5 --plot plot1 --skipConnection True --transposeWeight False
+python run_grand_capacity.py --operation project --parameter n --ntrials 5 --plot plot1  
 ```
 
 **Run $\texttt{project}$ wrt to $k$**
 ```
-python run_grand_capacity.py --operation project --parameter k --ntrials 5 --plot plot1 --skipConnection True --transposeWeight False
+python run_grand_capacity.py --operation project --parameter k --ntrials 5 --plot plot1 
+```
+
+**Run $\texttt{project}$ wrt to $p$**
+```
+python run_grand_capacity.py --operation project --parameter p --ntrials 5 --plot plot1 --num_neurons 250
 ```
 
 > Note that `skipConnection` is a `bool` flag, indicating whether to do direct decoder (skip connection) from area 0 to area 2.
@@ -67,6 +72,11 @@ python run_grand_capacity.py --operation reci-project --parameter n --ntrials 5 
 **Run $\texttt{reciprocal-project}$ wrt to $k$**
 ```
 python run_grand_capacity.py --operation reci-project --parameter k --ntrials 5 --plot plot1 --skipConnection
+```
+
+**Run $\texttt{reciprocal-project}$ wrt to $p$**
+```
+python run_grand_capacity.py --operation reci-project --parameter p --ntrials 5 --plot plot1 --skipConnection
 ```
 
 ## D) To reproduce the SVD distance plot:
