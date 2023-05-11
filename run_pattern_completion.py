@@ -35,7 +35,7 @@ def measure_percentage_recovered(original_assem, recovered_assem):
     idx_recovered = np.where(recovered_assem == 1)[0]
 
     intersect = set(idx_original) & set(idx_recovered)
-    return len(intersect)/len(idx_original)
+    return (len(intersect)/len(idx_original)) * 100
 
 
 def pattern_completion(alpha, num_neurons=1000, nrounds=5, beta=0.1,
@@ -122,8 +122,8 @@ def pattern_completion(alpha, num_neurons=1000, nrounds=5, beta=0.1,
     recovered_outputs_stack = np.vstack(tuple([np.vstack(tuple(
         [recovered_outputs[j, i] for i in range(nsamples)])) for j in range(nclasses)]))
 
-    # Initialize array to store median hamming distance for each class
-    median_recover_rate = np.zeros((nclasses,))
+    # Initialize array to store mean hamming distance for each class
+    mean_recover_rate = np.zeros((nclasses,))
 
     # Iterate over each class
     for j in range(nclasses):
@@ -137,9 +137,9 @@ def pattern_completion(alpha, num_neurons=1000, nrounds=5, beta=0.1,
         recover_rate = np.array([measure_percentage_recovered(original_outputs_j[i, :], recovered_outputs_j[i, :])
                                 for i in range(nsamples)])
 
-        # Compute median hamming distance within class j
-        median_recover_rate[j] = np.median(recover_rate)
-    return median_recover_rate  # nclasses by 1 vector
+        # Compute mean hamming distance within class j
+        mean_recover_rate[j] = np.mean(recover_rate)
+    return mean_recover_rate  # nclasses by 1 vector
 
 
 def experiment_on_pattern_completion(alpha, num_neurons=1000, beta=0.1,
@@ -157,31 +157,31 @@ def experiment_on_pattern_completion(alpha, num_neurons=1000, beta=0.1,
     for i, nround in enumerate(nroundss):
         result_for_this_r = np.zeros((nclasses, ntrials))
         for itrial in range(ntrials):
-            median_recover = pattern_completion(alpha, num_neurons=num_neurons, nrounds=nround, beta=beta,
-                                                nclasses=nclasses, m=m,
-                                                k=k, connection_p=connection_p, r=r, q=q, nsamples=nsamples,
-                                                with_normalization=with_normalization, wipe_y=wipe_y,
-                                                nrecurrent_rounds=nrecurrent_rounds)
-            result_for_this_r[:, itrial] = median_recover
+            mean_recover = pattern_completion(alpha, num_neurons=num_neurons, nrounds=nround, beta=beta,
+                                              nclasses=nclasses, m=m,
+                                              k=k, connection_p=connection_p, r=r, q=q, nsamples=nsamples,
+                                              with_normalization=with_normalization, wipe_y=wipe_y,
+                                              nrecurrent_rounds=nrecurrent_rounds)
+            result_for_this_r[:, itrial] = mean_recover
         results[:, :, i] = result_for_this_r
 
-    median = np.round(np.median(results, axis=1))
+    mean = np.round(np.mean(results, axis=1), 4)
     sem = np.std(results, axis=1)/np.sqrt(ntrials)
 
     colors = cm.get_cmap('flare', nclasses)
     # plot each class
     for iclass in range(results.shape[0]):
         label = "Class %i" % (iclass)
-        y = median[iclass, :]
+        y = mean[iclass, :]
         y_sem = sem[iclass, :]
 
         # plt.plot(
         #     nroundss, y, label=label, color=colors(iclass))
         plt.plot(
-            nroundss, y, color=colors(iclass))
+            nroundss, y, color=colors(iclass), label=label)
         plt.fill_between(nroundss, y - y_sem, y + y_sem,
                          alpha=0.25, color=colors(iclass), edgecolor='none')
-    # plt.legend()
+    plt.legend()
     plt.xlabel('Learning time per class')
     plt.ylabel('Percentage assembly recovered')
     plt.show()
@@ -189,4 +189,4 @@ def experiment_on_pattern_completion(alpha, num_neurons=1000, beta=0.1,
 
 if __name__ == "__main__":
     experiment_on_pattern_completion(
-        0.6, nclasses=10, ntrials=5)
+        0.5, nclasses=5, ntrials=5)

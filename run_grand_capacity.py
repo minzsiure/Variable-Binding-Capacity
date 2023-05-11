@@ -1332,11 +1332,11 @@ def test_capacity_in_reciprocal_projection_as_a_function_of_p_with_linear_classi
                                                                                                                                                                                                 with_normalization=with_normalization, wipe_y=wipe_y,
                                                                                                                                                                                                 nrecurrent_rounds=nrecurrent_rounds,
                                                                                                                                                                                                 classifier=classifier, show_input_overlap=show_input_overlap)
-                if not obtain_capacity_of_Y and overlap_within_class_Y <= overlap_outside_class_Y:
+                if not obtain_capacity_of_Y and overlap_within_class_Y - 0.05 <= overlap_outside_class_Y:
                     avg_capacity_Y.append(try_class)
                     obtain_capacity_of_Y = True
                     # break
-                if not obtain_capacity_of_Z and overlap_within_class_Z <= overlap_outside_class_Z:
+                if not obtain_capacity_of_Z and overlap_within_class_Z - 0.05 <= overlap_outside_class_Z:
                     avg_capacity_Z.append(try_class)
                     obtain_capacity_of_Z = True
                 if obtain_capacity_of_Y and obtain_capacity_of_Z:
